@@ -1,6 +1,5 @@
 
 // CONSTS
-var CARD_OFFSET = 50;
 var CARD_DECK = {
   suits: [
     { name:'club',    logo:'♣' },
@@ -219,8 +218,9 @@ function handleCascDrop(event, ui, drop) {
 
   // STEP 2: Place cards into this cascade
   let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
+  let cardOffset = getCardOffset();
   $.each(cards, (i, card) => {
-    let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - CARD_OFFSET) : 0;
+    let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - cardOffset) : 0;
     let newCard = dropCard($('#'+$(card).prop('id')), $(drop), '', intTop);
   });
 
@@ -318,7 +318,6 @@ function handleStartBtn() {
   if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
 
   // STEP 3: Fill board
-  doRespConfig();
   doFillBoard();
 }
 
@@ -396,7 +395,8 @@ function cascHelper() {
 
   // C: "Cascade" cards in container to match orig style
   // REQD! We have to do this as we use negative margins to stack cards above, else they'll go up in this container and look all doofy
-  container.find('div.card').each(function(i,ele){ $(this).css('position', 'absolute').css('top', (i*CARD_OFFSET)+'px'); });
+  let cardOffset = getCardOffset();
+  container.find('div.card').each(function(i,ele){ $(this).css('position', 'absolute').css('top', (i*cardOffset)+'px'); });
 
   // LAST:
   return container;
@@ -444,6 +444,7 @@ function doFillBoard() {
     });
   }
   else {
+    let cardOffset = getCardOffset();
     $.each(arrCards.shuffle(), function(i,card){
       // NOTE: Set on the element itself (using a class with these values will not work)
       card.css('position','relative');
@@ -451,7 +452,7 @@ function doFillBoard() {
       card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
 
       // Append CARD using animation
-      $('#cardCasc'+intCol).append( card.animate({ left:0, top:-($('#cardCasc'+intCol+' .card').length * ($('.card:first-child').height()-CARD_OFFSET)) + 'px' }, (i*1000/52) ) );
+      $('#cardCasc'+intCol).append( card.animate({ left:0, top:-($('#cardCasc'+intCol+' .card').length * ($('.card:first-child').height()-cardOffset)) + 'px' }, (i*1000/52) ) );
 
       // Fill cascade cols in round-robin order
       intCol = intCol%8 + 1;
@@ -509,21 +510,20 @@ function loadSounds() {
   function onError(e){ console.error("Unable to load sound. "+e); }
 }
 
-function doRespConfig() {
-  // STEP 1: Responsive Setup
-  if      ( $(window).innerWidth() < 800 ) CARD_OFFSET = 30;
-  else if ( $(window).innerWidth() < 900 ) CARD_OFFSET = 40;
-  else CARD_OFFSET = 50;
+function getCardOffset(){
+  if($(window).innerWidth() < 800)
+    return 30;
+  if($(window).innerWidth() < 900)
+    return 40;
+  return 50;
 }
 
 function doRespLayout() {
-  // STEP 1: Responsive Setup
-  doRespConfig();
-
-  // STEP 2: Re-fan cards to handle varying offsets as resizes occur
+  // STEP 1: Re-fan cards to handle varying offsets as resizes occur
+  let cardOffset = getCardOffset();
   $('#cardCasc > div').each(function(i,col){
     $(col).find('.card').each(function(idx,card){ 
-      $(card).css('top','-'+(idx*($('.card:first-child').height()-CARD_OFFSET))+'px'); 
+      $(card).css('top','-'+(idx*($('.card:first-child').height()-cardOffset))+'px'); 
     });
   });
 }
@@ -593,7 +593,7 @@ function appStart() {
   });
   
   // STEP 4: Add handler for window resize (use a slight delay for PERF)
-  window.onresize = function(){ clearTimeout(gTimer); gTimer = setTimeout(doRespLayout, 100); };
+  window.onresize = function(){ clearTimeout(gTimer); gTimer = setTimeout(doRespLayout, 0); };
 
   // STEP 5: Web-Audio for iOS
   $(document).on('touchstart', '#btnStart', function(){
