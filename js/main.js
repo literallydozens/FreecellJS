@@ -91,6 +91,33 @@ function setupDraggable(card){
   });
 }
 
+function showCard(card){
+  card.show().css('visibility', 'visible');
+  card.find("span").show().css('visibility', 'visible');
+}
+
+function dropCard(card, where, zIndex = '', top = 0, draggable = true, position = 'relative'){
+  // STEP 1: Warn listeners that the card is moving out of it's previous place
+  card.trigger("moveOut");
+  // STEP 2: Clone the card
+  let newCard = card.clone();
+  // STEP 3: Place the cards
+  newCard.css({'position': position, 'left':'0px', 'top':top+'px', 'z-index':zIndex});
+  where.append(newCard);
+  // STEP 4: Make sure the new card will be visible
+  showCard(newCard);
+  // STEP 5: Remove the dragged cards from the board
+  card.draggable('option', 'revert', false);
+  card.detach().hide();
+  // STEP 6: make it draggable
+  if ( !draggable )
+    newCard.css('cursor','default');
+  else
+    setupDraggable(newCard);
+  // FINALLY: return the cloned card for further processing
+  return newCard;
+}
+
 function checkFounDrop(ui, drop){
   // RULE 1: Was only a single card provided?
   if ( ui.helper.children().length != 1 ) {
@@ -119,39 +146,20 @@ function checkFounDrop(ui, drop){
 }
 
 function handleFounDrop(event, ui, drop) {
-  // DOCS: "$(this) [drop] represents the droppable the draggable is dropped on. ui.draggable represents the draggable"
-  // NOTE: jQuery UI draggables will revert no matter what (even if we func accept:ARG and return true/false), so revert:false is reqd!
   if(!checkFounDrop(ui, drop))
     return false;
   
-  // STEP 0: Warn that the card is moving out
-  ui.draggable.trigger("moveOut");
-
   // STEP 1: VFX/SFX update
-  if (gGameOpts.sound) playSound(gGameSounds.cardFlip);
+  if(gGameOpts.sound)
+    playSound(gGameSounds.cardFlip);
 
-  // STEP 2: "Grab" card and place it into this foundation
-  {
-    // A: Remove revert or the card flyback animation will run (yes, even with code below that deatches it!)
-    ui.draggable.draggable('option', 'revert', false);
-    // B: "Grab"/Deatch/Append CARD
-    ui.draggable.detach().appendTo( $(drop) ).removeAttr('style'); // NOTE: Remove style is a small fix for jquery-ui oddness
-    // C: Unhide the card that we hid when we built draggable container
-    ui.draggable.find('span').css('visibility','visible'); // IMPORTANT: the cool cards we use have spans that must be set on their own
-    // D: Reset z-index to mid-level
-    ui.draggable.css('z-index', $(drop).find('.card').length);
-    // E: "Stack" all cards by using position (0,0)
-    ui.draggable.css({ position:'absolute', top:'0px', left:'0px' });
-  }
+  // STEP 2: Place it into this foundation
+  let zIndex = $(drop).find('.card').length;
+  let newCard = dropCard(ui.draggable, $(drop), zIndex, 0, gGameOpts.allowFounReuse, "absolute");
 
-  // STEP 3: Apply options
-  if ( !gGameOpts.allowFounReuse ) {
-    ui.draggable.draggable('disable');
-    ui.draggable.css('cursor','default');
-  }
-
-  // STEP 4: CHECK: End of game?
-  if ( $('#cardFoun .card').length == 52 ) doGameWon();
+  // STEP 3: CHECK: End of game?
+  if ( $('#cardFoun .card').length == 52 )
+    doGameWon();
 }
 
 function checkOpenDrop(ui, drop){
@@ -170,45 +178,28 @@ function checkOpenDrop(ui, drop){
 function handleOpenDrop(event, ui, drop) {
   if(!checkOpenDrop(ui, drop))
     return false;
-  // STEP 0: Warn that the card is moving out
-  ui.draggable.trigger("moveOut");
   
   // STEP 1: VFX/SFX update
   if (gGameOpts.sound) playSound(gGameSounds.cardFlip);
-
-  // STEP 2: "Grab" card and place it into this slow
-  // A: Remove revert or the card flyback animation will run (yes, even with code below that detaches it!)
-  ui.draggable.draggable('option', 'revert', false);
-  // B: "Grab"/Detach/Append CARD
-  ui.draggable.detach().appendTo(drop).removeAttr('style'); // NOTE: Remove style is a small fix for jquery-ui oddness
-  // C: Unhide the card that we hid when we built draggable container
-  ui.draggable.find('span').css('visibility','visible'); // IMPORTANT: the cool cards we use have spans that must be set on their own
-  // D: Fix positioning CSS
-  ui.draggable.css('top', '0px');
-  ui.draggable.css('left', '0px');
-  // E: Reset z-index to mid-level (use 99 so we're above any 500 but always under card which drags at 100)
-  ui.draggable.css('z-index',99);
+  
+  // STEP 2: Place it in the free cell
+  let newCard = dropCard(ui.draggable, $(drop), 99);
 
   // STEP 3: Turn off this slot until it frees up again
-  if ( !gGameOpts.cheatUnlimOpen ) drop.droppable('disable');
-  else $.each(drop.children('.card'), function(i,card){ $(card).css('position','relative').css('top',i*-1*($(card).height()-20)+'px').css('left','0px');});
+  if ( !gGameOpts.cheatUnlimOpen ) 
+    drop.droppable('disable');
+  else 
+    $.each(drop.children('.card'), (i,card) => $(card).css('position','relative').css('top',i*-1*($(card).height()-20)+'px'));
 
-  // STEP 4: Reset draggable params (esp. helper as prev one from cascades does things we no longer want to do)
-  ui.draggable.one("moveOut", () => {
-    ui.draggable.css('z-index', 100);
-    ui.draggable.draggable('option', 'revert', true);
-    $(drop).droppable('enable');
-  });
+  // STEP 4: When the card will move out of the slot, reactivate it
+  newCard.one("moveOut", () => $(drop).droppable('enable'));
 }
 
-function handleCascDrop(event, ui, drop) {
-  drop = $(drop);
+function checkCascDrop(ui,drop){
   // DESIGN: We check for valid sets upon dragStart, so assume set sequence is valid upon drop
-  var cardTopCasc = drop.children().last();
-  var card = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children()[0] : ui.draggable;
-  var cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
-
   // RULE 1: Is the single-card/container-top-card in run order?
+  let cardTopCasc = drop.children().last();
+  let card = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children()[0] : ui.draggable;
   if ( drop.children().length > 0
     && ( $.inArray($(cardTopCasc).data('suit'), SUIT_DICT[$(card).data('suit')].accepts) == -1
       || NUMB_DICT[$(cardTopCasc).data('numb')].cascDrop != $(card).data('numb') )
@@ -216,23 +207,21 @@ function handleCascDrop(event, ui, drop) {
     if ( gGameOpts.showTips ) null; // TODO
     return false;
   }
-  
-  // STEP 0: Warn that the card is moving out
-  ui.draggable.trigger("moveOut");
+  return true;
+}
+
+function handleCascDrop(event, ui, drop) {
+  if(!checkCascDrop(ui, drop))
+    return false;
 
   // STEP 1: VFX/SFX update
   if (gGameOpts.sound) playSound(gGameSounds.cardFlip);
 
-  // STEP 2: "Grab" card(s) and place them into this cascade
-  $.each(cards, function(i,obj){
-    var card = $('#'+$(obj).prop('id'));
-    var intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - CARD_OFFSET) : 0;
-    let newCard = card.clone();
-    newCard.css({ 'position':'relative', 'left':'0px', 'top':intTop+'px', 'z-index':'' });
-    setupDraggable(newCard);
-    drop.append(newCard);
-    card.draggable('option', 'revert', false);
-    card.detach().hide();
+  // STEP 2: Place cards into this cascade
+  let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
+  $.each(cards, (i, card) => {
+    let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - CARD_OFFSET) : 0;
+    let newCard = dropCard($('#'+$(card).prop('id')), $(drop), '', intTop);
   });
 
   // STEP 3: Shorten fanning padding if card stack grows too large
@@ -278,7 +267,7 @@ function handleCardDblClick(card) {
 function handleDragStart(event, ui){
   var prevCard;
 
-  // RULE 1: If a group is being dragged, then vallidate the sequence, otherwise, dont allow drag to even start
+  // RULE 1: If a group is being dragged, then validate the sequence, otherwise, dont allow drag to even start
   if ( ui.helper.prop('id') == 'draggingContainer' && ui.helper.children().length > 1 ) {
     for (var idx=0; idx<ui.helper.children().length; idx++) {
       var card = ui.helper.children()[idx];
@@ -296,7 +285,7 @@ function handleDragStart(event, ui){
     }
   }
 
-  // RULE 2: Ensure enough free slots existing to ahndle number of cards being dragged
+  // RULE 2: Ensure enough free slots existing to handle number of cards being dragged
   if ( ui.helper.prop('id') == 'draggingContainer' && ui.helper.children().length > 1 ) {
     if ( (ui.helper.children().length - 1) > (4 - $('#cardOpen .card').length) ) {
       if ( gGameOpts.showTips ) null; // TODO
@@ -308,8 +297,13 @@ function handleDragStart(event, ui){
 }
 
 function handleDragStop(event, ui){
-  // STEP 1: Re-display hidden/cloned cards on revert (or orig one being dragged shows)
-  $('#cardCasc div, #cardCasc span').show().css('visibility', 'visible');
+  let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
+  $.each(cards, (i, card) => {
+    let cardId = '#'+$(card).prop('id');
+    showCard($('#cardCasc').find(cardId));
+    showCard($('#cardFoun').find(cardId));
+    showCard($('#cardOpen').find(cardId));
+  });
 }
 
 // ==============================================================================================
@@ -396,7 +390,7 @@ function cascHelper() {
   container.append( $(this).nextAll('.card').clone() );
 
   // B: Hide original cards
-  $(this).css('visibility','hidden'); // IMPORTANT: Dont hide() this or container jumps to {0,0} (jQuery must be using .next or whataver)
+  $(this).css('visibility','hidden'); // IMPORTANT: Dont hide() this or container jumps to {0,0} (jQuery must be using .next or whatever)
   $(this).find('span').css('visibility','hidden'); // IMPORTANT: the cool cards we use have spans that must be set on their own
   $(this).nextAll().hide();
 
