@@ -1,6 +1,11 @@
+/* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
+/* global $, console, Stats */
+/* exported handleMenuBtn, handleOptionsOpen, handleOptionsClose, handleOptionsNewGame */
 
 // CONSTS
-var CARD_DECK = {
+const FOUNDATIONS = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'];
+const OPENCELLS = ['#cardOpen1','#cardOpen2','#cardOpen3','#cardOpen4'];
+const CARD_DECK = {
   suits: [
     { name:'club',    logo:'♣' },
     { name:'diamond', logo:'♦' },
@@ -23,13 +28,13 @@ var CARD_DECK = {
     { name:'king',  numb:'K',  class:'face' }
   ]
 };
-var SUIT_DICT = {
+const SUIT_DICT = {
   club:    { color:'b', accepts:['diamond', 'heart'] },
   diamond: { color:'r', accepts:['club'   , 'spade'] },
   heart:   { color:'r', accepts:['club'   , 'spade'] },
   spade:   { color:'b', accepts:['diamond', 'heart'] }
 };
-var NUMB_DICT = {
+const NUMB_DICT = {
   A: { cascDrop:''  , founDrop:'2' },
   2: { cascDrop:'A' , founDrop:'3' },
   3: { cascDrop:'2' , founDrop:'4' },
@@ -44,9 +49,10 @@ var NUMB_DICT = {
   Q: { cascDrop:'J' , founDrop:'K' },
   K: { cascDrop:'Q' , founDrop:''  }
 };
-// VARIABLES
-var gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-var gTimer;
+
+// GLOBAL VARIABLES
+let gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let gTimer;
 
 // GAME SETUP
 {
@@ -62,6 +68,7 @@ var gTimer;
   gGameOpts.allowFounReuse = false;
   gGameOpts.cheatUnlimOpen = false;
   gGameOpts.debugOneLeft   = false;
+  gGameOpts.debugDistrib   = false;
   gGameOpts.showTips       = true;
   gGameOpts.sound          = true;
   gGameOpts.tableBkgdUrl   = gGameTableBkgds.pattern.url;
@@ -120,14 +127,14 @@ function dropCard(card, where, zIndex = '', top = 0, draggable = true, position 
 function checkFounDrop(ui, drop){
   // RULE 1: Was only a single card provided?
   if ( ui.helper.children().length != 1 ) {
-    if ( gGameOpts.showTips ) null; // TODO
+    if ( gGameOpts.showTips ) {} // TODO
     return false;
   }
 
   // RULE 2: Is card valid?
   if ( drop.children('.card').length == 0 ) {
     if ( ui.draggable.data('numb') != 'A' ) {
-      if ( gGameOpts.showTips ) null; // TODO
+      if ( gGameOpts.showTips ) {} // TODO
       return false;
     }
   }
@@ -137,7 +144,7 @@ function checkFounDrop(ui, drop){
 
     // Is card next in sequence?
     if ( topCard.data('suit') != card.data('suit') || NUMB_DICT[topCard.data('numb')].founDrop != card.data('numb') ) {
-      if ( gGameOpts.showTips ) null; // TODO
+      if ( gGameOpts.showTips ) {} // TODO
       return false;
     }
   }
@@ -154,21 +161,24 @@ function handleFounDrop(event, ui, drop) {
 
   // STEP 2: Place it into this foundation
   let zIndex = $(drop).find('.card').length;
-  let newCard = dropCard(ui.draggable, $(drop), zIndex, 0, gGameOpts.allowFounReuse, "absolute");
+  dropCard(ui.draggable, $(drop), zIndex, 0, gGameOpts.allowFounReuse, "absolute");
 
   // STEP 3: CHECK: End of game?
   if ( $('#cardFoun .card').length == 52 )
-    doGameWon();
+    return doGameWon();
+  
+  // STEP 4: CHECK: Can we fill more ?
+  tryToFillFoundation();
 }
 
 function checkOpenDrop(ui, drop){
   // RULE 1: Was only a single card provided?
   if ( ui.helper.children().length != 1 ) {
-    if ( gGameOpts.showTips ) null; // TODO
+    if ( gGameOpts.showTips ) {} // TODO
     return false;
   }
   if ( drop.children().length != 0){
-    if ( gGameOpts.showTips ) null; // TODO
+    if ( gGameOpts.showTips ) {} // TODO
     return false;
   }
   return true;
@@ -192,6 +202,9 @@ function handleOpenDrop(event, ui, drop) {
 
   // STEP 4: When the card will move out of the slot, reactivate it
   newCard.one("moveOut", () => $(drop).droppable('enable'));
+  
+  // STEP 5: CHECK: Can we fill foundation ?
+  tryToFillFoundation();
 }
 
 function checkCascDrop(ui,drop){
@@ -199,11 +212,11 @@ function checkCascDrop(ui,drop){
   // RULE 1: Is the single-card/container-top-card in run order?
   let cardTopCasc = drop.children().last();
   let card = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children()[0] : ui.draggable;
-  if ( drop.children().length > 0
-    && ( $.inArray($(cardTopCasc).data('suit'), SUIT_DICT[$(card).data('suit')].accepts) == -1
-      || NUMB_DICT[$(cardTopCasc).data('numb')].cascDrop != $(card).data('numb') )
+  if ( drop.children().length > 0 && 
+      ( $.inArray($(cardTopCasc).data('suit'), SUIT_DICT[$(card).data('suit')].accepts) == -1 || 
+      NUMB_DICT[$(cardTopCasc).data('numb')].cascDrop != $(card).data('numb') )
   ) {
-    if ( gGameOpts.showTips ) null; // TODO
+    if ( gGameOpts.showTips ) {} // TODO
     return false;
   }
   return true;
@@ -221,9 +234,12 @@ function handleCascDrop(event, ui, drop) {
   let cardOffset = getCardOffset();
   $.each(cards, (i, card) => {
     let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - cardOffset) : 0;
-    let newCard = dropCard($('#'+$(card).prop('id')), $(drop), '', intTop);
+    dropCard($('#'+$(card).prop('id')), $(drop), '', intTop);
   });
-
+  
+  // STEP 3: CHECK: Can we fill foundation ?
+  tryToFillFoundation();
+  
   // STEP 3: Shorten fanning padding if card stack grows too large
   // TODO: measure #playArea and length of children
 }
@@ -239,12 +255,12 @@ function handleCardDblClick(card) {
   // are we in the cascades ?
   if($(card).parents("#cardCasc").length > 0){
       // CHECK 1: Can card go to foundation?
-      drop = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'].map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
+      drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
       if(drop)
         return handleFounDrop(event, ui, drop);
       
       // CHECK 2: Do we have an open slot to send this card to?
-      drop = ['#cardOpen1','#cardOpen2','#cardOpen3','#cardOpen4'].map(id => $(id)).filter(drop => checkOpenDrop(ui, drop))[0];
+      drop = OPENCELLS.map(id => $(id)).filter(drop => checkOpenDrop(ui, drop))[0];
       if(drop)
         return handleOpenDrop(event, ui, drop);
   }
@@ -252,7 +268,7 @@ function handleCardDblClick(card) {
   // are we in the open slot ?
   if($(card).parents("#cardOpen").length > 0){
     // CHECK 1: Can card go to foundation?
-    drop = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'].map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
+    drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
     if(drop){
       $(card).trigger("dragstart");
       return handleFounDrop(event, ui, drop);
@@ -273,9 +289,8 @@ function handleDragStart(event, ui){
       var card = ui.helper.children()[idx];
       // Just capture first card, then start checking seq
       if ( idx > 0 ) {
-        if ( $.inArray($(card).data('suit'), SUIT_DICT[$(prevCard).data('suit')].accepts) == -1
-          || NUMB_DICT[$(prevCard).data('numb')].cascDrop != $(card).data('numb')
-        ) {
+        if ( $.inArray($(card).data('suit'), SUIT_DICT[$(prevCard).data('suit')].accepts) == -1 || 
+             NUMB_DICT[$(prevCard).data('numb')].cascDrop != $(card).data('numb')) {
           // Disallow drag start
           handleDragStop(event, ui);
           return false;
@@ -288,7 +303,7 @@ function handleDragStart(event, ui){
   // RULE 2: Ensure enough free slots existing to handle number of cards being dragged
   if ( ui.helper.prop('id') == 'draggingContainer' && ui.helper.children().length > 1 ) {
     if ( (ui.helper.children().length - 1) > (4 - $('#cardOpen .card').length) ) {
-      if ( gGameOpts.showTips ) null; // TODO
+      if ( gGameOpts.showTips ) {} // TODO
       // Disallow drag start
       handleDragStop(event, ui);
       return false;
@@ -306,18 +321,58 @@ function handleDragStop(event, ui){
   });
 }
 
+function checkCardIsInFoundation(found, numb, suit){
+  if(suit.some)
+    return suit.some(s => checkCardIsInFoundation(found, numb, s));
+  if(!found.children('.card').length)
+    return false;
+  let topcard = $(found.children('.card').last());
+  if(topcard.data('suit') != suit)
+    return false;
+  let cur = topcard.data('numb');
+  while(cur){
+    if(cur == numb)
+      return true;
+    cur = NUMB_DICT[cur].cascDrop;
+  }
+  return false;
+}
+
+function isCardOkForFoundation(card){
+  let suit = card.data('suit');
+  let numb = card.data('numb');
+  let prevNumb = NUMB_DICT[numb].cascDrop;
+  // CHECK: Only put to foundation if it is useless in the cascade
+  if(prevNumb == "")
+    return true;
+
+  let otherSuits = SUIT_DICT[suit].accepts;
+  let nbAlreadyHere = FOUNDATIONS.map(id => $(id)).filter(found => checkCardIsInFoundation(found,prevNumb,otherSuits)).length;
+  return (nbAlreadyHere == otherSuits.length);
+}
+
+function moveCardToFoundation(card){
+  let ui = { draggable:card, helper:{ children:() => [card] } };
+  let drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui, drop))[0];
+  if(!drop)
+    return false;
+  handleFounDrop({}, ui, drop);
+  return true;
+}
+
+function tryToFillFoundation(){
+  let cards = OPENCELLS.map(id => $($(id).children('.card').last()));
+  for(let i=0;i<8;i++)
+    cards.push($($("#cardCasc"+(i+1)).children('.card').last()));
+  cards = cards.filter(card => card && card.data('suit'));
+  return cards.some(card => (isCardOkForFoundation(card) && moveCardToFoundation(card)));
+}
+
 // ==============================================================================================
 
 function handleStartBtn() {
-  // STEP 1:
   $('#dialogStart').dialog('close');
-
-  // STEP 2: iOS requires a touch event before any type of audio can be played, then everything will work as normal
-  // SOLN: A: play a dummy sound (https://paulbakaus.com/tutorials/html5/web-audio-on-ios/)
-  // ....: B: play a real startup sound when applicable (this is our case)
   if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
-
-  // STEP 3: Fill board
   doFillBoard();
 }
 
@@ -327,21 +382,13 @@ function handleMenuBtn() {
 }
 
 function handleOptionsNewGame() {
-  // STEP 1: UX/UI Update
   if (gGameOpts.sound) playSound(gGameSounds.sadTrombone);
-
-  // STEP 2: Close dialog
   $('#dialogMenu').dialog('close');
-
-  // STEP 3: Clear/Fill board
   doFillBoard();
 }
 
 function handleOptionsOpen() {
-  // STEP 1: Update UI options
   $('#chkOptSound').prop('checked', gGameOpts.sound);
-
-  // LAST: Open dialog
   $('#dialogOptions').dialog('open');
 }
 
@@ -373,7 +420,10 @@ function playSound(objSound) {
   var source = gAudioCtx.createBufferSource();
   source.buffer = objSound.buffer;
   source.connect(gAudioCtx.destination);
-  (source.start) ? source.start(0) : source.noteOn(0);
+  if(source.start)
+    source.start(0);
+  else
+    source.noteOn(0);
 }
 
 // ==============================================================================================
@@ -396,45 +446,53 @@ function cascHelper() {
   // C: "Cascade" cards in container to match orig style
   // REQD! We have to do this as we use negative margins to stack cards above, else they'll go up in this container and look all doofy
   let cardOffset = getCardOffset();
-  container.find('div.card').each(function(i,ele){ $(this).css('position', 'absolute').css('top', (i*cardOffset)+'px'); });
+  container.find('div.card').each(function(i){ $(this).css('position', 'absolute').css('top', (i*cardOffset)+'px'); });
 
   // LAST:
   return container;
 }
 
 function doFillBoard() {
-  var arrCards = [];
-  var strHtml = '';
+  let arrCards = [];
 
   // STEP 1: VFX/SFX
   if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
 
   // STEP 2: Build cards
   $('.card').remove();
-  $.each(CARD_DECK.suits, function(i,suit){
-    $.each(CARD_DECK.cards, function(j,card){
+  $.each(CARD_DECK.cards.slice().reverse(), function(j,card){
+    $.each(CARD_DECK.suits, function(i,suit){
       // A:
-      var objNode = $('<div id="card'+ suit.name.substring(0,1) + card.numb +'" class="card" '
-        + ' data-suit="'+suit.name+'" data-numb="'+card.numb+'">'
-        + '<div class="card-'+card.name+' '+suit.name+'">'
-        + '<div class="corner top">'
-        + '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>'
-        + (card.class == 'suit'
-          ? '<span class="suit top_center">'+suit.logo+'</span><span class="suit bottom_center">'+suit.logo+'</span>'
+      var objNode = $('<div id="card'+ suit.name.substring(0,1) + card.numb +'" class="card" ' +
+        ' data-suit="'+suit.name+'" data-numb="'+card.numb+'">' +
+        '<div class="card-'+card.name+' '+suit.name+'">' +
+        '<div class="corner top">' +
+        '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>' +
+        (card.class == 'suit' ?
+          '<span class="suit top_center">'+suit.logo+'</span><span class="suit bottom_center">'+suit.logo+'</span>'
           : '<span class="face middle_center"><img src="img/faces/face-'+card.name+'-'+suit.name+'.png"></span>'
-        )
-        + '<div class="corner bottom">'
-        + '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>'
-        + '</div>'
-        + '</div>');
+        ) + 
+        '<div class="corner bottom">' +
+        '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>' +
+        '</div>' +
+        '</div>');
       // B:
       arrCards.push( objNode );
     });
   });
 
   // STEP 3: Shuffle / Deal cards into tableau, fanned style
-  var intCol = 1;
-  if ( gGameOpts.debugOneLeft ) {
+  let intCol = 1;
+  let cardOffset = getCardOffset();
+  if ( gGameOpts.debugDistrib ) {
+    $.each(arrCards, function(i,card){
+      card.css('position','relative');
+      card.css('left', (i%2 == 0 ? '-1000px' : '1000px') );
+      card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
+      $('#cardCasc'+intCol).append( card.animate({ left:0, top:-($('#cardCasc'+intCol+' .card').length * ($('.card:first-child').height()-cardOffset)) + 'px' }, (i*1000/52) ) );
+      intCol = intCol%4 + 1;
+    });
+  } else if ( gGameOpts.debugOneLeft ) {
     $.each(arrCards, function(i,card){
       if      (i < 13) $('#cardFoun1').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
       else if (i < 26) $('#cardFoun2').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
@@ -442,9 +500,7 @@ function doFillBoard() {
       else if (i < 51) $('#cardFoun4').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
       else             $('#cardCasc1').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
     });
-  }
-  else {
-    let cardOffset = getCardOffset();
+  } else {
     $.each(arrCards.shuffle(), function(i,card){
       // NOTE: Set on the element itself (using a class with these values will not work)
       card.css('position','relative');
@@ -478,7 +534,6 @@ function doGameWon() {
 
   // STEP 2:
   $('#dialogYouWon').dialog('open');
-  console.log('boom');
 
   // STEP 3:
   for (var idx=12; idx>=0; idx--){
@@ -500,7 +555,7 @@ function loadSounds() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', sound.url, true);
     xhr.responseType = 'arraybuffer';
-    xhr.onload = function(e){
+    xhr.onload = function(){
       if (this.status == 0 || this.status == 200)
         gAudioCtx.decodeAudioData(xhr.response, function(buffer){ sound.buffer = buffer; }, onError);
     };
@@ -603,7 +658,10 @@ function appStart() {
     var source = gAudioCtx.createBufferSource();
     source.buffer = buffer;
     source.connect(gAudioCtx.destination); // connect to output (your speakers)
-    (source.start) ? source.start(0) : source.noteOn(0);
+    if(source.start)
+      source.start(0);
+    else
+      source.noteOn(0);
 
     // B: Start game
     handleStartBtn();
@@ -617,11 +675,11 @@ function appStart() {
     gGameOpts.sound = (localStorage.sound == "true");
   $('#chkOptSound').prop('checked', gGameOpts.sound);
   $.each(gGameTableBkgds, function(i,obj){
-    var strHtml = '<div>'
-          + '  <div><input id="radBkgd'+i+'" name="radBkgd" type="radio" data-url="'+ obj.url +'" '
-          + (gGameOpts.tableBkgdUrl == obj.url ? ' checked="checked"' : '') + '></div>'
-          + '  <div><label for="radBkgd'+i+'"><div style="background:url(\''+ obj.url +'\'); width:100%; height:60px;"></div></div>'
-          + '</div>';
+    var strHtml = '<div>' +
+          '  <div><input id="radBkgd'+i+'" name="radBkgd" type="radio" data-url="'+ obj.url +'" ' +
+          (gGameOpts.tableBkgdUrl == obj.url ? ' checked="checked"' : '') + '></div>' +
+          '  <div><label for="radBkgd'+i+'"><div style="background:url(\''+ obj.url +'\'); width:100%; height:60px;"></div></div>' +
+          '</div>';
 
     $('#optBkgds').append( strHtml );
   });
@@ -631,4 +689,4 @@ function appStart() {
 }
 
 // ==============================================================================================
-$(document).ready(function(){ appStart(); })
+$(document).ready(function(){ appStart(); });

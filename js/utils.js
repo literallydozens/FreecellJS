@@ -6,4 +6,4 @@ Array.prototype.shuffle = function(){
     temp = this[i]; this[i] = this[j]; this[j] = temp;
   }
   return this;
-}
+};

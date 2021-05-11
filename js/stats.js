@@ -1,3 +1,7 @@
+/* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
+/* global $, console */
+/* exported handleStatsOpen, Stats */
+
 var Stats = (function(){
   let stats;
   
@@ -6,7 +10,7 @@ var Stats = (function(){
     stats = {};
     if(v){
       try{
-        stats = JSON.parse(v)
+        stats = JSON.parse(v);
       }catch(err){
         console.log("can't parse localstorage game statistics: ", err);
       }
@@ -43,7 +47,7 @@ var Stats = (function(){
   function endGame(status){
     stats.allGames = (stats.allGames || []);
     let endTime = new Date();
-    startTime = endTime;
+    let startTime = endTime;
     if(stats.startTime){
       startTime = new Date(stats.startTime);
       delete stats.startTime;
