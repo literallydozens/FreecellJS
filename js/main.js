@@ -512,7 +512,7 @@ function loadSounds() {
 
 function getCardOffset(){
   if($(window).innerWidth() < 800)
-    return 30;
+    return 40;
   if($(window).innerWidth() < 900)
     return 40;
   return 50;
