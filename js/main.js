@@ -536,7 +536,11 @@ function doGameWon() {
   // STEP 3:
   for (var idx=12; idx>=0; idx--){
     $('.card[data-numb='+CARD_DECK.cards[idx].numb+']').each(function(i,card){
-      $(card).animate( {left:( Math.floor(Math.random()*12) * 100 )+'px', top:($(window).innerHeight()*1.1)+'px'}, (intDelay += 100), function(){$(this).remove();} );
+      let left = Math.floor(Math.random()*12) * 100;
+      let top = $(window).innerHeight() * 1.1;
+      let offset = $(card).offset();
+      $("body").append($(card).detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
+      $(card).animate({left:left+'px', top:top+'px'}, (intDelay += 100), function(){$(this).remove();});
     });
   }
   
