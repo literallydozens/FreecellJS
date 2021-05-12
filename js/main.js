@@ -489,7 +489,10 @@ function doFillBoard() {
       card.css('position','relative');
       card.css('left', (i%2 == 0 ? '-1000px' : '1000px') );
       card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
-      $('#cardCasc'+intCol).append( card.animate({ left:0, top:-($('#cardCasc'+intCol+' .card').length * ($('.card:first-child').height()-cardOffset)) + 'px' }, (i*1000/52) ) );
+      let nbCardsAlreadyPresent = $('#cardCasc'+intCol+' .card').length;
+      let cardHeight = ($('.card:first-child').height() || 0);
+      let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
+      $('#cardCasc'+intCol).append(card.animate({left:0,top: finalTop + 'px'}, (i*1000/52)));
       intCol = intCol%4 + 1;
     });
   } else if ( gGameOpts.debugOneLeft ) {
@@ -502,25 +505,20 @@ function doFillBoard() {
     });
   } else {
     $.each(arrCards.shuffle(), function(i,card){
-      // NOTE: Set on the element itself (using a class with these values will not work)
       card.css('position','relative');
       card.css('left', (i%2 == 0 ? '-1000px' : '1000px') );
       card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
-
-      // Append CARD using animation
-      $('#cardCasc'+intCol).append( card.animate({ left:0, top:-($('#cardCasc'+intCol+' .card').length * ($('.card:first-child').height()-cardOffset)) + 'px' }, (i*1000/52) ) );
-
-      // Fill cascade cols in round-robin order
+      let nbCardsAlreadyPresent = $('#cardCasc'+intCol+' .card').length;
+      let cardHeight = ($('.card:first-child').height() || 0);
+      let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
+      $('#cardCasc'+intCol).append(card.animate({left:0,top: finalTop + 'px'}, (i*1000/52)));
       intCol = intCol%8 + 1;
     });
   }
 
   // STEP 4: Draggable setup
   setupDraggable($('.card'));
-  
-  // STEP 5: Adjust card fanning offset
-  doRespLayout();
-  
+    
   // STEP 6: Inform the statistics module
   Stats.startGame();
 }
@@ -581,6 +579,11 @@ function doRespLayout() {
       $(card).css('top','-'+(idx*($('.card:first-child').height()-cardOffset))+'px'); 
     });
   });
+  $('#dialogStart').dialog({position: { my: "center", at: "center", of: window }});
+  $('#dialogYouWon').dialog({position: { my: "center", at: "center", of: window }});
+  $('#dialogMenu').dialog({position: { my: "center", at: "center", of: window }});
+  $('#dialogOptions').dialog({position: { my: "center", at: "center", of: window }});
+  $('#dialogStats').dialog({position: { my: "center", at: "center", of: window }});
 }
 
 function appStart() {
@@ -610,13 +613,13 @@ function appStart() {
   // STEP 3: jQuery Dialog setup
   $('#dialogStart').dialog({
     modal: true,
-    autoOpen: true,
+    autoOpen: false,
     draggable: false,
     resizable: false,
     dialogClass: 'dialogCool',
     closeOnEscape: false,
-    height: ( $(window).innerWidth() < 1080 ? 300 : 330 ),
-    width:  ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.9 : 0.8 ) )
+    width: "80%",
+    position: { my: "center", at: "center", of: window }
   });
   $('#dialogYouWon').dialog({
     modal: true,
@@ -625,8 +628,8 @@ function appStart() {
     resizable: false,
     dialogClass: 'dialogCool',
     closeOnEscape: false,
-    width: ($(window).innerWidth() * 0.6),
-    height: ($(window).innerHeight() * 0.5)
+    width: "60%",
+    position: { my: "center", at: "center", of: window }
   });
   $('#dialogMenu').dialog({
     modal: true,
@@ -635,7 +638,8 @@ function appStart() {
     resizable: false,
     dialogClass: 'dialogCool',
     closeOnEscape: true,
-    width: ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.5 : 0.4 ) )
+    width: "60%",
+    position: { my: "center", at: "center", of: window }
   });
   $('#dialogOptions').dialog({
     modal: true,
@@ -644,7 +648,8 @@ function appStart() {
     resizable: false,
     dialogClass: 'dialogCool',
     closeOnEscape: true,
-    width: ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.5 : 0.3 ) )
+    width: "60%",
+    position: { my: "center", at: "center", of: window }
   });
   
   // STEP 4: Add handler for window resize (use a slight delay for PERF)
@@ -686,6 +691,9 @@ function appStart() {
   
   // STEP 7: Initialise statistics popup
   Stats.init();
+  
+  // STEP 8: Launch start popup
+  $('#dialogStart').dialog('open');
 }
 
 // ==============================================================================================

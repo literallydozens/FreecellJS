@@ -115,7 +115,7 @@ button.coolBtn.small {
 }
 
 /* */
-.hBtnTab { display: table; width: 100%; position: absolute; left: 0; bottom: 30px; }
+.hBtnTab { display: table; width: 100%; left: 0; bottom: 30px; }
 .hBtnTab > div { display: table-cell; padding:0 30px; text-align:left; vertical-align: bottom; }
 .hBtnTab > div:nth-child(1) { width:20%; }
 .hBtnTab > div:nth-child(2) { width:50%; }
@@ -164,11 +164,15 @@ button.coolBtn.small {
 }
 #dialogOptions #optBkgds > div > div:first-child { vertical-align: middle; }
 
-.dialogYouWon {
-    background-color: #222222;
-    background: repeating-linear-gradient(45deg, #d7d7d7 0%, #d7d7d7 10%, #eee 0%, #eee 50%) 0 / 15px 15px;
-    border-radius: 50px;
-    border-width: 20px;
+#dialogYouWon {
+}
+
+#dialogYouWon .bigText {
+    font-size: 8em;
+    text-align: center;
+    color: #BA01FF;
+    font-family: Roboto; font-weight: 400;
+    animation: neonPurple 1.5s ease-in-out infinite alternate;
 }
 
 .dialogCool {
@@ -191,13 +195,6 @@ button.coolBtn.small {
 
 /* --------------------------------------------------------------------------------------------- */
 
-.bigText {
-    font-size: 10em;
-    text-align: center;
-    color: #BA01FF;
-    font-family: Roboto; font-weight: 400;
-    animation: neonPurple 1.5s ease-in-out infinite alternate;
-}
 .bigBtnBar {
     padding: 10px;
     text-align: center;
@@ -379,6 +376,7 @@ h1, .card, div#gameTitle {
     #topArea > div#gameTitle { font-size: 1.5em; }
     #topArea > div#gameTitle > div#title { margin: 4px 0; }
     #topArea > div#gameTitle > div > div { font-size: 2em; }
+    #dialogYouWon .bigText { font-size: 7em; }
 }
 
 /* Responsive Rules: 1280-1399=PC */
@@ -392,6 +390,8 @@ h1, .card, div#gameTitle {
     #topArea > div#gameTitle > div#title { margin: 3px 0; }
     #topArea > div#gameTitle > div > div { font-size: 1.2em; }
     #topArea > div#gameTitle #btnMenu { font-size: 0.6em; padding: 2px; }
+    
+    #dialogYouWon .bigText { font-size: 6em; }
 
     .card .face, .card .face img, .card .suit.top_center, .card .suit.middle_center, .card .suit.bottom_center { visibility: hidden !important; }
     .card .corner                    { font-size: 1.5em; }
@@ -413,6 +413,8 @@ h1, .card, div#gameTitle {
     #playArea { padding: 20px; }
     #topArea > #cardFoun .slot h1 { line-height:126px; }
     .card, .slot { width:90px; height:126px; font-size:8px; }
+    
+    #dialogYouWon .bigText { font-size: 5em; }
 
     #topArea > div#gameTitle > div#title { margin: -2px 0; }
     #topArea > div#gameTitle > div > div { font-size: 1.5em; text-shadow:none; }
@@ -447,6 +449,7 @@ h1, .card, div#gameTitle {
     #topArea { margin-bottom: 1em; }
     #topArea > #cardFoun .slot h1 { line-height:99px; }
     .card, .slot { width:70px; height:98px; font-size:8px; }
+    #dialogYouWon .bigText { font-size: 4em; }
 
     .card .corner        { font-size: 1.3em; }
     .card .corner.top    span,
@@ -458,6 +461,7 @@ h1, .card, div#gameTitle {
 @media only screen and (max-width: 700px) {
     #topArea > #cardFoun .slot h1 { line-height:91px; }
     .card, .slot { width:65px; height:91px; font-size:4px; }
+    #dialogYouWon .bigText { font-size: 2.5em; }
 
     #playArea { padding:15px; }
     #topArea { margin-bottom: 15px; }
