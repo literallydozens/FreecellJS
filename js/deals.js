@@ -2,9 +2,14 @@
 /* exported Deals */
 
 let Deals = (function(){
+  function addCounterToCb(cb){
+    let i = 0;
+    return (casc,card) => cb(casc,card,i++);
+  }
   const numbs = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
   const suits = ["club","diamond","heart","spade"];
   function standard(seed, cbDeal){
+    cbDeal = addCounterToCb(cbDeal);
     let state = seed;
     function getRnd(){
       state = (214013*state + 2531011) & 0x7FFFFFFF;
@@ -24,6 +29,7 @@ let Deals = (function(){
     cbDeal(casc, deck[0]);
   }
   function debug(cbDeal){
+    cbDeal = addCounterToCb(cbDeal);
     let invNumbs = numbs.slice().reverse();
     suits.forEach((s, i) => invNumbs.forEach(n => cbDeal(i+1, n+"-"+s)));
   }

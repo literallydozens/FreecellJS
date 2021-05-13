@@ -15,10 +15,16 @@
 @font-face { font-family: 'Roboto';          src: url('../fonts/Roboto-Light.ttf')   format('truetype'); }
 
 body {
-    margin: 0px;
-    overflow: hidden;
-    background: url('../img/table_pattern.jpg');
-    background-size: 100% 100%;
+  margin: 0px;
+  background: url('../img/table_pattern.jpg');
+  background-size: 100% 100%;
+}
+
+body div.content {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  width: 100%;
 }
 
 /* Patterns from https://codepen.io/andrewdavid11/pen/ycqrz/ */

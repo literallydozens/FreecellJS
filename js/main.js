@@ -205,8 +205,9 @@ function handleCascDrop(event, ui, drop) {
   // STEP 2: Place cards into this cascade
   let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
   let cardOffset = getCardOffset();
+  let cardHeight = getCardHeight();
   $.each(cards, (i, card) => {
-    let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - ($('.card:first-child').height() - cardOffset) : 0;
+    let intTop = ( drop.children().length > 0 ) ? Number(drop.children().last().css('top').replace('px','')) - (cardHeight - cardOffset) : 0;
     dropCard($('#'+$(card).prop('id')), $(drop), '', intTop);
   });
   
@@ -476,17 +477,30 @@ function doFillBoard(gameNumber) {
   //let method = Deals.debug;
 
   // STEP 3: Deal the cards
-  let cardOffset = getCardOffset();
-  method(function(casc, card){
+  let cardOffset = getCardOffset(); 
+  let cardHeight = getCardHeight();
+  let height = $(window).innerHeight();
+  let width = $(window).innerWidth();
+  let nbCardsPresent = [];
+  method(function(casc, card, idx){
     let [numb, suit] = card.split("-");
     let cardDiv = buildCard(numb, suit);
-    cardDiv.css('position','relative');
-    cardDiv.css('left', (Math.random() < 0.5 ? '-1000px' : '1000px') );
-    cardDiv.css('top',  (Math.random() < 0.5 ? '-1000px' : '1000px') );
-    let nbCardsAlreadyPresent = $('#cardCasc'+casc+' .card').length;
-    let cardHeight = ($('.card:first-child').height() || 0);
-    let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
-    $('#cardCasc'+casc).append(cardDiv.animate({left:0,top: finalTop + 'px'}, (1*1000/52)));
+    cardDiv.css('position','absolute');
+    cardDiv.css('left', (idx%2 ? '-1000px' : (width+1000)+'px') );
+    cardDiv.css('top',  (idx%2 ? '-1000px' : (height+1000)+'px') );
+    nbCardsPresent[casc] = (nbCardsPresent[casc] || 0) + 1;
+    let finalTop = -((nbCardsPresent[casc]-1) * (cardHeight-cardOffset));
+    let animTop = (nbCardsPresent[casc]-1) * cardOffset;
+    let offset = $('#cardCasc'+casc).offset();
+    console.log(casc, offset);
+    $("body div.content").append(cardDiv);
+    cardDiv.delay(idx*25).animate({left:offset.left+"px",top:(offset.top+animTop)+'px'}, 200, () => {
+      cardDiv.detach();
+      cardDiv.css('position','relative');
+      cardDiv.css('left', '0px');
+      cardDiv.css('top',  finalTop + 'px');
+      $('#cardCasc'+casc).append(cardDiv);
+    });
   });
 
   // STEP 4: Draggable setup
@@ -497,14 +511,14 @@ function doFillBoard(gameNumber) {
 }
 
 function winAnimation(){
-  let intDelay = 500;
-  ["A","2","3","4","5","6","7","8","9","10","J","Q","K"].forEach(numb => {
+  ["K","Q","J","10","9","8","7","6","5","4","3","2","A"].forEach((numb, j) => {
     $('.card[data-numb='+numb+']').each(function(i,card){
-      let left = Math.floor(Math.random()*12) * 100;
+      card = $(card);
+      let left = Math.floor(Math.random()*$(window).innerWidth());
       let top = $(window).innerHeight() * 1.1;
-      let offset = $(card).offset();
-      $("body").append($(card).detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
-      $(card).animate({left:left+'px', top:top+'px'}, (intDelay += 100), function(){$(this).remove();});
+      let offset = card.offset();
+      $("body div.content").append(card.detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
+      card.delay(j*100).animate({left:left+'px', top:top+'px'}, 1000, () => card.remove());
     });
   });
 }
@@ -550,12 +564,50 @@ function getCardOffset(){
   return 50;
 }
 
+// need to be sync with the CSS
+var deduceHeight = (function(){
+  let cache = null;
+  return function(screenWidth){
+    if(cache && cache.screenWidth == screenWidth)
+      return cache.size;
+    let reactiveSize = [
+      {screenWidth: 1400},
+      {screenWidth: 1280,h: 133,w: 95},
+      {screenWidth: 1080,h: 126,w: 90},
+      {screenWidth: 1020,h: 126,w: 90},
+      {screenWidth: 900 ,h: 98 ,w: 70},
+      {screenWidth: 800 ,h: 98 ,w: 70},
+      {screenWidth: 700 ,h: 91 ,w: 65},
+      {screenWidth: 600 ,h: 84 ,w: 60},
+      {screenWidth: 550 ,h: 70 ,w: 50},
+      {screenWidth: 425 ,h: 70 ,w: 50},
+      {screenWidth: 375}
+    ];
+    let size = {h:168,w:120};
+    for(let i=0;i<reactiveSize;i++){
+      if(reactiveSize.screenWidth < screenWidth)
+        break;
+      if(reactiveSize.h)
+        size.h = reactiveSize.h;
+      if(reactiveSize.w)
+        size.w = reactiveSize.w;
+    }
+    cache = {screenWidth,size};
+    return size;
+  };
+})();
+
+function getCardHeight(){
+  return ($('.card:first-child').height() || deduceHeight($(window).innerWidth()).h);
+}
+
 function doRespLayout() {
   // STEP 1: Re-fan cards to handle varying offsets as resizes occur
   let cardOffset = getCardOffset();
+  let cardHeight = getCardHeight();
   $('#cardCasc > div').each(function(i,col){
     $(col).find('.card').each(function(idx,card){ 
-      $(card).css('top','-'+(idx*($('.card:first-child').height()-cardOffset))+'px'); 
+      $(card).css('top','-'+(idx*(cardHeight-cardOffset))+'px'); 
     });
   });
   $('#dialogMenu').dialog({position: { my: "center", at: "center", of: window }});
