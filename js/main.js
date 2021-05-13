@@ -1,33 +1,10 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console, Stats */
+/* global $, console, Stats, Deals */
 /* exported handleMenuBtn, handleOptionsOpen, handleOptionsClose, handleOptionsNewGame */
 
 // CONSTS
 const FOUNDATIONS = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'];
 const OPENCELLS = ['#cardOpen1','#cardOpen2','#cardOpen3','#cardOpen4'];
-const CARD_DECK = {
-  suits: [
-    { name:'club',    logo:'♣' },
-    { name:'diamond', logo:'♦' },
-    { name:'heart',   logo:'♥' },
-    { name:'spade',   logo:'♠' }
-  ],
-  cards: [
-    { name:'ace',   numb:'A',  class:'suit' },
-    { name:'two',   numb:'2',  class:'suit' },
-    { name:'three', numb:'3',  class:'suit' },
-    { name:'four',  numb:'4',  class:'suit' },
-    { name:'five',  numb:'5',  class:'suit' },
-    { name:'six',   numb:'6',  class:'suit' },
-    { name:'seven', numb:'7',  class:'suit' },
-    { name:'eight', numb:'8',  class:'suit' },
-    { name:'nine',  numb:'9',  class:'suit' },
-    { name:'ten',   numb:'10', class:'suit' },
-    { name:'jack',  numb:'J',  class:'face' },
-    { name:'queen', numb:'Q',  class:'face' },
-    { name:'king',  numb:'K',  class:'face' }
-  ]
-};
 const SUIT_DICT = {
   club:    { color:'b', accepts:['diamond', 'heart'] },
   diamond: { color:'r', accepts:['club'   , 'spade'] },
@@ -452,97 +429,106 @@ function cascHelper() {
   return container;
 }
 
-function doFillBoard() {
-  let arrCards = [];
+const suitToLogo = {
+  club: '♣',
+  diamond: '♦',
+  heart: '♥',
+  spade: '♠'
+};
+const numbToName = {
+  'A' : 'ace',  
+  '2' : 'two',  
+  '3' : 'three',
+  '4' : 'four', 
+  '5' : 'five', 
+  '6' : 'six',  
+  '7' : 'seven',
+  '8' : 'eight',
+  '9' : 'nine', 
+  '10': 'ten',  
+  'J' : 'jack', 
+  'Q' : 'queen',
+  'K' : 'king'
+};
+const isFace = {'J': true, 'Q': true, 'K': true};
 
+function buildCard(numb, suit){
+    let cardId = "card"+suit.substring(0,1)+numb;
+    let cardDiv = $("<div>").attr("id", cardId);
+    cardDiv.addClass("card").attr("data-suit", suit).attr("data-numb", numb);
+    let suitLogo = suitToLogo[suit];
+    let cardInnerDiv = $("<div>").addClass("card-"+numbToName[numb]).addClass(suit);
+    
+    let corner = $("<div>").addClass("corner");
+    corner.append($("<span>").addClass("number"+(numb == '10' ? ' ten':'')).text(numb));
+    corner.append($("<span>").text(suitLogo));
+    
+    cardInnerDiv.append(corner.clone().addClass("top"));
+    if(isFace[numb]){
+      let img = $("<img>").attr("src", "img/faces/face-"+numbToName[numb]+"-"+suit+".png");
+      cardInnerDiv.append($("<span>").addClass("face middle_center").append(img));
+    }else{
+      cardInnerDiv.append($("<span>").addClass("suit top_center").text(suitLogo));
+      cardInnerDiv.append($("<span>").addClass("suit bottom_center").text(suitLogo));
+    }
+    cardInnerDiv.append(corner.addClass("bottom"));
+    cardDiv.append(cardInnerDiv);
+    return cardDiv;
+}
+
+function doFillBoard() {
   // STEP 1: VFX/SFX
   if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
-
-  // STEP 2: Build cards
+  
+  // STEP 2: Remove all cards
   $('.card').remove();
-  $.each(CARD_DECK.cards.slice().reverse(), function(j,card){
-    $.each(CARD_DECK.suits, function(i,suit){
-      // A:
-      var objNode = $('<div id="card'+ suit.name.substring(0,1) + card.numb +'" class="card" ' +
-        ' data-suit="'+suit.name+'" data-numb="'+card.numb+'">' +
-        '<div class="card-'+card.name+' '+suit.name+'">' +
-        '<div class="corner top">' +
-        '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>' +
-        (card.class == 'suit' ?
-          '<span class="suit top_center">'+suit.logo+'</span><span class="suit bottom_center">'+suit.logo+'</span>'
-          : '<span class="face middle_center"><img src="img/faces/face-'+card.name+'-'+suit.name+'.png"></span>'
-        ) + 
-        '<div class="corner bottom">' +
-        '<span class="number'+ (card.numb == '10' ? ' ten':'') +'">'+card.numb+'</span><span>'+suit.logo+'</span></div>' +
-        '</div>' +
-        '</div>');
-      // B:
-      arrCards.push( objNode );
-    });
-  });
+  
+  // STEP 3: Choose dealing method
+  let method = Deals.standard.bind(null,Math.floor(32000*Math.random()));
 
-  // STEP 3: Shuffle / Deal cards into tableau, fanned style
-  let intCol = 1;
+  // STEP 3: Deal the cards
   let cardOffset = getCardOffset();
-  if ( gGameOpts.debugDistrib ) {
-    $.each(arrCards, function(i,card){
-      card.css('position','relative');
-      card.css('left', (i%2 == 0 ? '-1000px' : '1000px') );
-      card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
-      let nbCardsAlreadyPresent = $('#cardCasc'+intCol+' .card').length;
-      let cardHeight = ($('.card:first-child').height() || 0);
-      let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
-      $('#cardCasc'+intCol).append(card.animate({left:0,top: finalTop + 'px'}, (i*1000/52)));
-      intCol = intCol%4 + 1;
-    });
-  } else if ( gGameOpts.debugOneLeft ) {
-    $.each(arrCards, function(i,card){
-      if      (i < 13) $('#cardFoun1').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
-      else if (i < 26) $('#cardFoun2').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
-      else if (i < 39) $('#cardFoun3').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
-      else if (i < 51) $('#cardFoun4').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
-      else             $('#cardCasc1').append( card.css('position','absolute').animate({ left:0, top:0 }, (i*1000/52)) );
-    });
-  } else {
-    $.each(arrCards.shuffle(), function(i,card){
-      card.css('position','relative');
-      card.css('left', (i%2 == 0 ? '-1000px' : '1000px') );
-      card.css('top',  (i%2 == 0 ? '-1000px' : '1000px') );
-      let nbCardsAlreadyPresent = $('#cardCasc'+intCol+' .card').length;
-      let cardHeight = ($('.card:first-child').height() || 0);
-      let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
-      $('#cardCasc'+intCol).append(card.animate({left:0,top: finalTop + 'px'}, (i*1000/52)));
-      intCol = intCol%8 + 1;
-    });
-  }
+  method(function(casc, card){
+    let [numb, suit] = card.split("-");
+    let cardDiv = buildCard(numb, suit);
+    cardDiv.css('position','relative');
+    cardDiv.css('left', (Math.random() < 0.5 ? '-1000px' : '1000px') );
+    cardDiv.css('top',  (Math.random() < 0.5 ? '-1000px' : '1000px') );
+    let nbCardsAlreadyPresent = $('#cardCasc'+casc+' .card').length;
+    let cardHeight = ($('.card:first-child').height() || 0);
+    let finalTop = -(nbCardsAlreadyPresent * (cardHeight-cardOffset));
+    $('#cardCasc'+casc).append(cardDiv.animate({left:0,top: finalTop + 'px'}, (1*1000/52)));
+  });
 
   // STEP 4: Draggable setup
   setupDraggable($('.card'));
     
-  // STEP 6: Inform the statistics module
+  // STEP 5: Inform the statistics module
   Stats.startGame();
 }
 
-function doGameWon() {
-  // FYI: pulsing CSS text (http://jsfiddle.net/thirtydot/aDZLy/)
-  var intDelay = 500;
-
-  // STEP 1: VFX/SFX update
-  if (gGameOpts.sound) playSound(gGameSounds.crowdCheer);
-
-  // STEP 2:
-  $('#dialogYouWon').dialog('open');
-
-  // STEP 3:
-  for (var idx=12; idx>=0; idx--){
-    $('.card[data-numb='+CARD_DECK.cards[idx].numb+']').each(function(i,card){
+function winAnimation(){
+  const intDelay = 500;
+  ["A","2","3","4","5","6","7","8","9","10","J","Q","K"].forEach(numb => {
+    $('.card[data-numb='+numb+']').each(function(i,card){
       let left = Math.floor(Math.random()*12) * 100;
       let top = $(window).innerHeight() * 1.1;
       let offset = $(card).offset();
       $("body").append($(card).detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
       $(card).animate({left:left+'px', top:top+'px'}, (intDelay += 100), function(){$(this).remove();});
     });
-  }
+  });
+}
+
+function doGameWon() {
+  // STEP 1: VFX/SFX update
+  if (gGameOpts.sound) playSound(gGameSounds.crowdCheer);
+
+  // STEP 2:
+  $('#dialogYouWon').dialog('open');
+
+  // STEP 3: Win animation
+  winAnimation();
   
   // STEP 4: Update stats
   Stats.gameWon();
