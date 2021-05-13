@@ -36,28 +36,23 @@
 
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
+	<script type="text/javascript" src="js/menu.js"></script>
 	<script type="text/javascript" src="js/stats.js"></script>
 	<script type="text/javascript" src="js/deals.js"></script>
 </head>
 <body>
-	<div id="dialogStart" style="display:none">
-		<div class="title">Freecell Solitaire</div>
-		<div class="hBtnTab">
-			<div><button onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')">How To Play</button></div>
-			<div><button id="btnStart" onclick="handleStartBtn()">PLAY</button></div>
-			<div><button onclick="handleOptionsOpen()">Options</button></div>
-      <div><button onclick="handleStatsOpen()">Stats</button></div>
-		</div>
-	</div>
-
-	<div id="dialogMenu" style="display:none">
-		<div class="bigBtnBar">
-			<button onclick="handleOptionsNewGame()">New Game</button>
-			<button onclick="handleOptionsOpen()">Options</button>
-      <button onclick="handleStatsOpen()">Stats</button>
-			<button onclick="$('#dialogMenu').dialog('close');">Resume</button>
-		</div>
-	</div>
+  <div id="dialogMenu" style="display:none">
+    <div class="bigText">Game #</div>
+    <div class="bigBtnBar">
+      <button id="menuPlayBtn" class="green highlight" onclick="handleOptionsNewGame()">Play</button>
+      <button id="menuNewBtn" class="red" onclick="handleOptionsNewGame()">Play</button>
+      <button id="menuRetryBtn" class="red" onclick="handleOptionsRetry()">Retry</button>
+      <button class="blue" onclick="handleOptionsOpen()">Options</button>
+      <button class="blue" onclick="handleStatsOpen()">Stats</button>
+      <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')">How To Play</button>
+      <button id="menuResumeBtn"  class="green" onclick="$('#dialogMenu').dialog('close');">Resume</button>
+    </div>
+  </div>
 
 	<div id="dialogOptions" style="display:none">
 		<div class="label">Sound</div>
@@ -108,16 +103,9 @@
 			<button class="coolBtn small" onclick="$('#dialogStats').dialog('close');">Close</button>
 		</div>
 	</div>
-  
-  <div id="dialogYouWon" style="display:none">
-    <div class="bigText">WINNER!!!</div>
-    <div class="bigBtnBar">
-      <button onclick="$('#dialogYouWon').dialog('close'); doFillBoard();">Play Again</button>
-    </div>
-  </div>
 
   <div id="topBar">
-    <button onclick="handleMenuBtn()">MENU</button>
+    <button onclick="handleMenuOpen()">MENU</button>
     <div><div class="red">♥</div></div>
     <div id="title">FREECELL</div>
     <div><div class="blk">♣</div></div>
@@ -137,7 +125,7 @@
 				<div><div class="red">♥</div><div class="blk">♠</div></div>
 				<div id="title">FREECELL</div>
 				<div><div class="blk">♣</div><div class="red">♦</div></div>
-				<button id="btnMenu" onclick="handleMenuBtn()">MENU</button>
+				<button id="btnMenu" onclick="handleMenuOpen()">MENU</button>
 			</div>
 			<div id="cardFoun" style="width:45%">
 				<div id="cardFounCont">

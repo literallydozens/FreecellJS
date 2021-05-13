@@ -1,6 +1,6 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console, Stats, Deals */
-/* exported handleMenuBtn, handleOptionsOpen, handleOptionsClose, handleOptionsNewGame */
+/* global $, console, Stats, Deals, Menu, handleMenuOpen */
+/* exported handleOptionsOpen, handleOptionsClose, handleOptionsNewGame */
 
 // CONSTS
 const FOUNDATIONS = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'];
@@ -353,17 +353,6 @@ function handleStartBtn() {
   doFillBoard();
 }
 
-function handleMenuBtn() {
-  $('#dialogMenu').dialog('open');
-  $('#dialogMenu button').blur();
-}
-
-function handleOptionsNewGame() {
-  if (gGameOpts.sound) playSound(gGameSounds.sadTrombone);
-  $('#dialogMenu').dialog('close');
-  doFillBoard();
-}
-
 function handleOptionsOpen() {
   $('#chkOptSound').prop('checked', gGameOpts.sound);
   $('#dialogOptions').dialog('open');
@@ -476,7 +465,7 @@ function buildCard(numb, suit){
     return cardDiv;
 }
 
-function doFillBoard() {
+function doFillBoard(gameNumber) {
   // STEP 1: VFX/SFX
   if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
   
@@ -484,7 +473,10 @@ function doFillBoard() {
   $('.card').remove();
   
   // STEP 3: Choose dealing method
-  let method = Deals.standard.bind(null,Math.floor(32000*Math.random()));
+  if(!gameNumber)
+    gameNumber = 1+Math.floor(32000*Math.random());
+  Menu.setRunningGame(gameNumber);
+  let method = Deals.standard.bind(null,gameNumber);
 
   // STEP 3: Deal the cards
   let cardOffset = getCardOffset();
@@ -508,7 +500,7 @@ function doFillBoard() {
 }
 
 function winAnimation(){
-  const intDelay = 500;
+  let intDelay = 500;
   ["A","2","3","4","5","6","7","8","9","10","J","Q","K"].forEach(numb => {
     $('.card[data-numb='+numb+']').each(function(i,card){
       let left = Math.floor(Math.random()*12) * 100;
@@ -524,14 +516,14 @@ function doGameWon() {
   // STEP 1: VFX/SFX update
   if (gGameOpts.sound) playSound(gGameSounds.crowdCheer);
 
-  // STEP 2:
-  $('#dialogYouWon').dialog('open');
-
-  // STEP 3: Win animation
+  // STEP 2: Win animation
   winAnimation();
   
-  // STEP 4: Update stats
+  // STEP 3: Update stats
   Stats.gameWon();
+  
+  // STEP 4:
+  handleMenuOpen("win");
 }
 
 function loadSounds() {
@@ -569,14 +561,12 @@ function doRespLayout() {
       $(card).css('top','-'+(idx*($('.card:first-child').height()-cardOffset))+'px'); 
     });
   });
-  $('#dialogStart').dialog({position: { my: "center", at: "center", of: window }});
-  $('#dialogYouWon').dialog({position: { my: "center", at: "center", of: window }});
   $('#dialogMenu').dialog({position: { my: "center", at: "center", of: window }});
   $('#dialogOptions').dialog({position: { my: "center", at: "center", of: window }});
   $('#dialogStats').dialog({position: { my: "center", at: "center", of: window }});
 }
 
-function appStart() {
+$(function() {
   // STEP 1: Start async load of sound files
   loadSounds();
 
@@ -601,36 +591,6 @@ function appStart() {
   });
 
   // STEP 3: jQuery Dialog setup
-  $('#dialogStart').dialog({
-    modal: true,
-    autoOpen: false,
-    draggable: false,
-    resizable: false,
-    dialogClass: 'dialogCool',
-    closeOnEscape: false,
-    width: "80%",
-    position: { my: "center", at: "center", of: window }
-  });
-  $('#dialogYouWon').dialog({
-    modal: true,
-    autoOpen: false,
-    draggable: false,
-    resizable: false,
-    dialogClass: 'dialogCool',
-    closeOnEscape: false,
-    width: "60%",
-    position: { my: "center", at: "center", of: window }
-  });
-  $('#dialogMenu').dialog({
-    modal: true,
-    autoOpen: false,
-    draggable: false,
-    resizable: false,
-    dialogClass: 'dialogCool',
-    closeOnEscape: true,
-    width: "60%",
-    position: { my: "center", at: "center", of: window }
-  });
   $('#dialogOptions').dialog({
     modal: true,
     autoOpen: false,
@@ -679,12 +639,12 @@ function appStart() {
     $('#optBkgds').append( strHtml );
   });
   
+  // STEP 7: Initialise menu popup
+  Menu.init();
+  
   // STEP 7: Initialise statistics popup
   Stats.init();
   
   // STEP 8: Launch start popup
-  $('#dialogStart').dialog('open');
-}
-
-// ==============================================================================================
-$(document).ready(function(){ appStart(); });
+  handleMenuOpen("start");
+});
