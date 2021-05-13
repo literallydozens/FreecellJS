@@ -38,6 +38,7 @@ var Stats = (function(){
     let avgWinTime = "#:##";
     if(nbWin){
       avgWinTime = allGames.filter(g => g.status == "Win").reduce((t,g) => t += g.time, 0)/nbWin;
+      avgWinTime = avgWinTime/1000;
       let min = Math.floor(avgWinTime/60);
       let sec = Math.floor(avgWinTime)%60;
       avgWinTime = ""+min+":"+(sec<10?"0"+sec:sec);
@@ -58,10 +59,18 @@ var Stats = (function(){
   }
   function startGame(){
     load();
-    if(stats.startTime)
+    if(stats.startTime){
       endGame("Lose");
-    stats.startTime = ""+(new Date());
-    save();
+      stats.startTime = null;
+      save();
+    }
+  }
+  function cardMoved(){
+    if(!stats.startTime){
+      load();
+      stats.startTime = ""+(new Date());
+      save();
+    }
   }
   function gameWon(){
     load();
@@ -96,7 +105,7 @@ var Stats = (function(){
     $('#stats-avgWinTime').text(stats.avgWinTime);
     $('#dialogStats').dialog('open');
   }
-  return {getStats, gameWon, startGame, reset, refresh, init};
+  return {getStats, gameWon, startGame, cardMoved, reset, refresh, init};
 })();
 
 function handleStatsOpen() {

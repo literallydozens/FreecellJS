@@ -23,5 +23,9 @@ let Deals = (function(){
     }
     cbDeal(casc, deck[0]);
   }
-  return {standard};
+  function debug(cbDeal){
+    let invNumbs = numbs.slice().reverse();
+    suits.forEach((s, i) => invNumbs.forEach(n => cbDeal(i+1, n+"-"+s)));
+  }
+  return {standard, debug};
 })();

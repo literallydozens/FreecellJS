@@ -43,9 +43,6 @@ let gTimer;
   // SETUP: Game Options / Defaults
   var gGameOpts = {};
   gGameOpts.allowFounReuse = false;
-  gGameOpts.cheatUnlimOpen = false;
-  gGameOpts.debugOneLeft   = false;
-  gGameOpts.debugDistrib   = false;
   gGameOpts.showTips       = true;
   gGameOpts.sound          = true;
   gGameOpts.tableBkgdUrl   = gGameTableBkgds.pattern.url;
@@ -82,17 +79,19 @@ function showCard(card){
 function dropCard(card, where, zIndex = '', top = 0, draggable = true, position = 'relative'){
   // STEP 1: Warn listeners that the card is moving out of it's previous place
   card.trigger("moveOut");
+  // STEP 2: Warn the statistic module that a card has been moved
+  Stats.cardMoved();
   // STEP 2: Clone the card
   let newCard = card.clone();
-  // STEP 3: Place the cards
+  // STEP 4: Place the cards
   newCard.css({'position': position, 'left':'0px', 'top':top+'px', 'z-index':zIndex});
   where.append(newCard);
-  // STEP 4: Make sure the new card will be visible
+  // STEP 5: Make sure the new card will be visible
   showCard(newCard);
-  // STEP 5: Remove the dragged cards from the board
+  // STEP 6: Remove the dragged cards from the board
   card.draggable('option', 'revert', false);
   card.detach().hide();
-  // STEP 6: make it draggable
+  // STEP 7: make it draggable
   if ( !draggable )
     newCard.css('cursor','default');
   else
@@ -172,10 +171,7 @@ function handleOpenDrop(event, ui, drop) {
   let newCard = dropCard(ui.draggable, $(drop), 99);
 
   // STEP 3: Turn off this slot until it frees up again
-  if ( !gGameOpts.cheatUnlimOpen ) 
-    drop.droppable('disable');
-  else 
-    $.each(drop.children('.card'), (i,card) => $(card).css('position','relative').css('top',i*-1*($(card).height()-20)+'px'));
+  drop.droppable('disable');
 
   // STEP 4: When the card will move out of the slot, reactivate it
   newCard.one("moveOut", () => $(drop).droppable('enable'));
@@ -477,6 +473,7 @@ function doFillBoard(gameNumber) {
     gameNumber = 1+Math.floor(32000*Math.random());
   Menu.setRunningGame(gameNumber);
   let method = Deals.standard.bind(null,gameNumber);
+  //let method = Deals.debug;
 
   // STEP 3: Deal the cards
   let cardOffset = getCardOffset();
