@@ -1,0 +1,115 @@
+#cardFoun .slot h1 {
+  line-height:168px; 
+}
+.card, .slot {
+  width: 120px; 
+  height: 168px;
+  font-size: 7.5px;
+}
+.card .corner span { 
+  font-size: 2.5em; 
+}
+
+
+@media only screen and (max-width: 1280px) {
+    #topArea > #cardFoun .slot h1 { line-height:168px; }
+    .card, .slot { width:120px; height:168px; font-size:8px; }
+}
+
+@media only screen and (max-width: 1150px) {
+    #topArea > #cardFoun .slot h1 { line-height:156px; }
+    .card, .slot { width:111px; height:156px; font-size:8px; }
+}
+
+@media only screen and (max-width: 1080px) {
+    #topArea > #cardFoun .slot h1 { line-height:147px; }
+    .card, .slot { width:105px; height:147px; font-size:8px; }
+}
+
+@media only screen and (max-width: 1020px) {
+    #topArea > #cardFoun .slot h1 { line-height:134px; }
+    .card, .slot { width:96px; height:134px; font-size:8px; }
+}
+
+@media only screen and (max-width: 900px) {
+    #topArea > #cardFoun .slot h1 { line-height:112px; font-size: 11em; }
+    .card, .slot { width:85px; height:119px; font-size:8px; }
+}
+
+@media only screen and (max-width: 800px) {
+    #topArea > #cardFoun .slot h1 { line-height:105px; }
+    .card, .slot { width:75px; height:105px; font-size:8px; }
+}
+
+@media only screen and (max-width: 700px) {
+    #topArea > #cardFoun .slot h1 { line-height:91px; }
+    .card, .slot { width:65px; height:91px; font-size:8px; }
+}
+
+@media only screen and (max-width: 600px) {
+    #topArea > #cardFoun .slot h1 { line-height:77px; }
+    .card, .slot { width:55px; height:77px; font-size:6px; }
+}
+
+@media only screen and (max-width: 500px) {
+    #topArea > #cardFoun .slot h1 { line-height:63px; }
+    .card, .slot { width:45px; height:63px; font-size:4px; }
+}
+
+@media only screen and (max-width: 400px) {
+    #topArea > #cardFoun .slot h1 { line-height:49px; }
+    .card, .slot { width:35px; height:49px; font-size:4px; }
+}
+
+
+/* Responsive Rules: 1081-1280=PC */
+@media only screen and (max-width: 1280px) {
+    .card .ten { margin-left: -6px; }
+
+    .card .corner                    { font-size: 1.5em; }
+    .card .corner span               { font-size: 4.5em; }
+    .card .corner.top                { top:    1em; left:  1em; text-align: left;  }
+    .card .corner.bottom             { bottom: 1em; right: 1em; text-align: right; }
+    .card .corner.top    span        { font-family: Suit;   font-size: 3em; margin-bottom: 2.25em; transform:rotate(180deg); }
+    .card .corner.bottom span        { font-family: Suit;   font-size: 3em; margin-bottom: 2.25em; transform:rotate(180deg); text-align:center; }
+    .card .corner.top    span.number { font-family: Roboto; font-size: 2em; transform:rotate(0deg); }
+    .card .corner.bottom span.number { font-family: Roboto; font-size: 2em; text-align:left; padding-top:0em; transform:rotate(0deg); }
+
+    .card .face, .card .face img, .card .suit.top_center, .card .suit.middle_center, .card .suit.bottom_center { visibility: hidden !important; }
+}
+
+/* Responsive Rules: 1080=tablets (iPad landscape=1024) */
+@media only screen and (max-width: 1080px) {
+    .card .corner.top    span,
+    .card .corner.bottom span { margin-bottom: 1.6em; }
+    .card .corner.top    span.number,
+    .card .corner.bottom span.number { font-size: 2.3em; }
+}
+
+@media only screen and (max-width: 900px) {
+    .card .corner        { font-size: 1.3em; }
+    .card .corner.top    span,
+    .card .corner.bottom span { margin-bottom: 1.5em; }
+    .card .corner.top    span.number,
+    .card .corner.bottom span.number { font-size: 2em; }
+}
+
+@media only screen and (max-width: 800px) {
+    .card .corner        { font-size: 1.3em; }
+    .card .corner.top    span,
+    .card .corner.bottom span { margin-bottom: 1.5em; }
+    .card .corner.top    span.number,
+    .card .corner.bottom span.number { font-size: 2em; }
+}
+
+@media only screen and (max-width: 600px) {
+    .card .ten { margin-left: 0px; }
+}
+
+@media only screen and (max-width: 500px) {
+    .card .corner        { font-size: 1.75em; }
+    .card .corner.top    span,
+    .card .corner.bottom span { margin-bottom: 1.5em; }
+    .card .corner.top    span.number,
+    .card .corner.bottom span.number { font-size: 2em; }
+}

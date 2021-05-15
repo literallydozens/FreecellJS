@@ -492,7 +492,6 @@ function doFillBoard(gameNumber) {
     let finalTop = -((nbCardsPresent[casc]-1) * (cardHeight-cardOffset));
     let animTop = (nbCardsPresent[casc]-1) * cardOffset;
     let offset = $('#cardCasc'+casc).offset();
-    console.log(casc, offset);
     $("body div.content").append(cardDiv);
     cardDiv.delay(idx*25).animate({left:offset.left+"px",top:(offset.top+animTop)+'px'}, 200, () => {
       cardDiv.detach();
@@ -571,26 +570,26 @@ var deduceHeight = (function(){
     if(cache && cache.screenWidth == screenWidth)
       return cache.size;
     let reactiveSize = [
-      {screenWidth: 1400},
-      {screenWidth: 1280,h: 133,w: 95},
-      {screenWidth: 1080,h: 126,w: 90},
-      {screenWidth: 1020,h: 126,w: 90},
-      {screenWidth: 900 ,h: 98 ,w: 70},
-      {screenWidth: 800 ,h: 98 ,w: 70},
+      {screenWidth: 1280,h: 168,w: 120},
+      {screenWidth: 1150,h: 156,w: 111},
+      {screenWidth: 1080,h: 147,w: 105},
+      {screenWidth: 1020,h: 134,w: 96},
+      {screenWidth: 900 ,h: 119 ,w: 85},
+      {screenWidth: 800 ,h: 105 ,w: 75},
       {screenWidth: 700 ,h: 91 ,w: 65},
-      {screenWidth: 600 ,h: 84 ,w: 60},
-      {screenWidth: 550 ,h: 70 ,w: 50},
-      {screenWidth: 425 ,h: 70 ,w: 50},
-      {screenWidth: 375}
+      {screenWidth: 600 ,h: 77 ,w: 55},
+      {screenWidth: 500 ,h: 63 ,w: 45},
+      {screenWidth: 400 ,h: 49 ,w: 35},
     ];
     let size = {h:168,w:120};
-    for(let i=0;i<reactiveSize;i++){
-      if(reactiveSize.screenWidth < screenWidth)
+    for(let i=0;i<reactiveSize.length;i++){
+      let reactSize = reactiveSize[i];
+      if(reactSize.screenWidth < screenWidth)
         break;
-      if(reactiveSize.h)
-        size.h = reactiveSize.h;
-      if(reactiveSize.w)
-        size.w = reactiveSize.w;
+      if(reactSize.h)
+        size.h = reactSize.h;
+      if(reactSize.w)
+        size.w = reactSize.w;
     }
     cache = {screenWidth,size};
     return size;
@@ -616,6 +615,7 @@ function doRespLayout() {
 }
 
 $(function() {
+  //alert($(window).innerWidth());
   // STEP 1: Start async load of sound files
   loadSounds();
 
