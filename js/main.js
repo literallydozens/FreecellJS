@@ -29,23 +29,8 @@ const NUMB_DICT = {
 
 // GLOBAL VARIABLES
 let gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let gTimer;
-
 // GAME SETUP
 {
-  // SETUP: Table backgrounds
-  var gGameTableBkgds = {};
-  gGameTableBkgds.pattern = { url:'img/table_pattern.jpg' };
-  gGameTableBkgds.circles = { url:'img/table_circles.jpg' };
-  gGameTableBkgds.felt    = { url:'img/table_felt.jpg'    };
-  gGameTableBkgds.plain   = { url:'img/table_plain.png'   };
-
-  // SETUP: Game Options / Defaults
-  var gGameOpts = {};
-  gGameOpts.allowFounReuse = false;
-  gGameOpts.showTips       = true;
-  gGameOpts.sound          = true;
-  gGameOpts.tableBkgdUrl   = gGameTableBkgds.pattern.url;
 
   // SETUP: Define / Start async load of sounds files
   // NOTE: iOS (as of iOS9) is unable to play ogg files, so we are using MP3 for everything
@@ -57,6 +42,12 @@ let gTimer;
 }
 
 // ==============================================================================================
+
+function showTips(text){
+  if(!Options.showTips)
+    return;
+  // TODO !
+}
 
 function setupDraggable(card){
   card
@@ -103,14 +94,14 @@ function dropCard(card, where, zIndex = '', top = 0, draggable = true, position 
 function checkFounDrop(ui, drop){
   // RULE 1: Was only a single card provided?
   if ( ui.helper.children().length != 1 ) {
-    if ( gGameOpts.showTips ) {} // TODO
+    showTips("You can only drop a single card at a time in this slot");
     return false;
   }
 
   // RULE 2: Is card valid?
   if ( drop.children('.card').length == 0 ) {
     if ( ui.draggable.data('numb') != 'A' ) {
-      if ( gGameOpts.showTips ) {} // TODO
+      showTips("You need to start this space with an ace");
       return false;
     }
   }
@@ -120,7 +111,7 @@ function checkFounDrop(ui, drop){
 
     // Is card next in sequence?
     if ( topCard.data('suit') != card.data('suit') || NUMB_DICT[topCard.data('numb')].founDrop != card.data('numb') ) {
-      if ( gGameOpts.showTips ) {} // TODO
+      showTips("This card doesn't folloow the correct sequence");
       return false;
     }
   }
@@ -132,12 +123,11 @@ function handleFounDrop(event, ui, drop) {
     return false;
   
   // STEP 1: VFX/SFX update
-  if(gGameOpts.sound)
-    playSound(gGameSounds.cardFlip);
+  playSound(gGameSounds.cardFlip);
 
   // STEP 2: Place it into this foundation
   let zIndex = $(drop).find('.card').length;
-  dropCard(ui.draggable, $(drop), zIndex, 0, gGameOpts.allowFounReuse, "absolute");
+  dropCard(ui.draggable, $(drop), zIndex, 0, false, "absolute");
 
   // STEP 3: CHECK: End of game?
   if ( $('#cardFoun .card').length == 52 )
@@ -150,11 +140,11 @@ function handleFounDrop(event, ui, drop) {
 function checkOpenDrop(ui, drop){
   // RULE 1: Was only a single card provided?
   if ( ui.helper.children().length != 1 ) {
-    if ( gGameOpts.showTips ) {} // TODO
+    showTips("You can only drop a single card in the free slots");
     return false;
   }
   if ( drop.children().length != 0){
-    if ( gGameOpts.showTips ) {} // TODO
+    showTips("There is already a card on this slot");
     return false;
   }
   return true;
@@ -165,7 +155,7 @@ function handleOpenDrop(event, ui, drop) {
     return false;
   
   // STEP 1: VFX/SFX update
-  if (gGameOpts.sound) playSound(gGameSounds.cardFlip);
+  playSound(gGameSounds.cardFlip);
   
   // STEP 2: Place it in the free cell
   let newCard = dropCard(ui.draggable, $(drop), 99);
@@ -189,7 +179,7 @@ function checkCascDrop(ui,drop){
       ( $.inArray($(cardTopCasc).data('suit'), SUIT_DICT[$(card).data('suit')].accepts) == -1 || 
       NUMB_DICT[$(cardTopCasc).data('numb')].cascDrop != $(card).data('numb') )
   ) {
-    if ( gGameOpts.showTips ) {} // TODO
+    showTips("This card, or stack of card don't follow the correct sequence order");
     return false;
   }
   return true;
@@ -200,7 +190,7 @@ function handleCascDrop(event, ui, drop) {
     return false;
 
   // STEP 1: VFX/SFX update
-  if (gGameOpts.sound) playSound(gGameSounds.cardFlip);
+  playSound(gGameSounds.cardFlip);
 
   // STEP 2: Place cards into this cascade
   let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
@@ -277,7 +267,7 @@ function handleDragStart(event, ui){
   // RULE 2: Ensure enough free slots existing to handle number of cards being dragged
   if ( ui.helper.prop('id') == 'draggingContainer' && ui.helper.children().length > 1 ) {
     if ( (ui.helper.children().length - 1) > (4 - $('#cardOpen .card').length) ) {
-      if ( gGameOpts.showTips ) {} // TODO
+      showTips("Not enough free slots to move the cards");
       // Disallow drag start
       handleDragStop(event, ui);
       return false;
@@ -346,31 +336,14 @@ function tryToFillFoundation(){
 
 function handleStartBtn() {
   $('#dialogStart').dialog('close');
-  if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
+  playSound(gGameSounds.cardShuffle);
   doFillBoard();
-}
-
-function handleOptionsOpen() {
-  $('#chkOptSound').prop('checked', gGameOpts.sound);
-  $('#dialogOptions').dialog('open');
-}
-
-function handleOptionsClose() {
-  // STEP 1: Update game options
-  gGameOpts.sound = $('#chkOptSound').prop('checked');
-  localStorage.sound = (gGameOpts.sound?"true":"false");
-  
-  // STEP 2: Set background
-  var strBkgdUrl = $('input[type="radio"][name="radBkgd"]:checked').data('url');
-  if ( strBkgdUrl ) $('body').css('background', 'url("'+ strBkgdUrl +'")');
-  localStorage.tableBkgdUrl = strBkgdUrl;
-
-  // LAST: Close dialog
-  $('#dialogOptions').dialog('close');
 }
 
 function playSound(objSound) {
   // SRC: http://www.html5rocks.com/en/tutorials/webaudio/intro/
+  if(!Options.sound)
+    return;
 
   // STEP 1: Reality Check
   if ( !objSound.buffer ) {
@@ -464,7 +437,7 @@ function buildCard(numb, suit){
 
 function doFillBoard(gameNumber) {
   // STEP 1: VFX/SFX
-  if (gGameOpts.sound) playSound(gGameSounds.cardShuffle);
+  playSound(gGameSounds.cardShuffle);
   
   // STEP 2: Remove all cards
   $('.card').remove();
@@ -524,7 +497,7 @@ function winAnimation(){
 
 function doGameWon() {
   // STEP 1: VFX/SFX update
-  if (gGameOpts.sound) playSound(gGameSounds.crowdCheer);
+  playSound(gGameSounds.crowdCheer);
 
   // STEP 2: Win animation
   winAnimation();
@@ -609,9 +582,6 @@ function doRespLayout() {
       $(card).css('top','-'+(idx*(cardHeight-cardOffset))+'px'); 
     });
   });
-  $('#dialogMenu').dialog({position: { my: "center", at: "center", of: window }});
-  $('#dialogOptions').dialog({position: { my: "center", at: "center", of: window }});
-  $('#dialogStats').dialog({position: { my: "center", at: "center", of: window }});
 }
 
 $(function() {
@@ -638,23 +608,16 @@ $(function() {
     tolerance:  'pointer',
     drop:       function(event,ui){ handleCascDrop(event, ui, $(this)); }
   });
-
-  // STEP 3: jQuery Dialog setup
-  $('#dialogOptions').dialog({
-    modal: true,
-    autoOpen: false,
-    draggable: false,
-    resizable: false,
-    dialogClass: 'dialogCool',
-    closeOnEscape: true,
-    width: "60%",
-    position: { my: "center", at: "center", of: window }
-  });
   
-  // STEP 4: Add handler for window resize (use a slight delay for PERF)
-  window.onresize = function(){ clearTimeout(gTimer); gTimer = setTimeout(doRespLayout, 0); };
+  // STEP 3: Add handler for window resize (use a slight delay for PERF)
+  let gTimer;
+  window.onresize = () => { 
+    clearTimeout(gTimer); 
+    gTimer = setTimeout(() => $(window).trigger("window:resize"), 0); 
+  };
+  $(window).on("window:resize", doRespLayout());
 
-  // STEP 5: Web-Audio for iOS
+  // STEP 4: Web-Audio for iOS
   $(document).on('touchstart', '#btnStart', function(){
     // A: Create and play a dummy sound to init sound in iOS
     // NOTE: iOS (iOS8+) mutes all sounds until a touch is detected (good on you Apple!), so we have to do this little thing here
@@ -671,29 +634,15 @@ $(function() {
     handleStartBtn();
   });
 
-  // STEP 6: Initialise options popup
-  if(localStorage.tableBkgdUrl)
-    gGameOpts.tableBkgdUrl = localStorage.tableBkgdUrl;
-  $('body').css('background', 'url("'+ gGameOpts.tableBkgdUrl +'")');
-  if(localStorage.sound)
-    gGameOpts.sound = (localStorage.sound == "true");
-  $('#chkOptSound').prop('checked', gGameOpts.sound);
-  $.each(gGameTableBkgds, function(i,obj){
-    var strHtml = '<div>' +
-          '  <div><input id="radBkgd'+i+'" name="radBkgd" type="radio" data-url="'+ obj.url +'" ' +
-          (gGameOpts.tableBkgdUrl == obj.url ? ' checked="checked"' : '') + '></div>' +
-          '  <div><label for="radBkgd'+i+'"><div style="background:url(\''+ obj.url +'\'); width:100%; height:60px;"></div></div>' +
-          '</div>';
-
-    $('#optBkgds').append( strHtml );
-  });
+  // STEP 5: Initialise options popup
+  Options.init();
   
-  // STEP 7: Initialise menu popup
+  // STEP 6: Initialise menu popup
   Menu.init();
   
   // STEP 7: Initialise statistics popup
   Stats.init();
   
   // STEP 8: Launch start popup
-  handleMenuOpen("start");
+  Menu.handleOpen("start");
 });

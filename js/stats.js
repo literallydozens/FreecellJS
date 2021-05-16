@@ -1,6 +1,6 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
 /* global $, console */
-/* exported handleStatsOpen, Stats */
+/* exported Stats */
 
 var Stats = (function(){
   let stats;
@@ -81,7 +81,16 @@ var Stats = (function(){
     stats = {};
     save();
   }
+  function refresh(){
+    let stats = getStats();
+    $('#stats-nbWin').text(stats.nbWin);
+    $('#stats-nbLose').text(stats.nbLose);
+    $('#stats-maxConsWin').text(stats.maxConsWin);
+    $('#stats-curConsWin').text(stats.curConsWin);
+    $('#stats-avgWinTime').text(stats.avgWinTime);
+  }
   function init(){
+    let position = { my: "center", at: "center", of: window };
     $('#dialogStats').dialog({
       modal: true,
       autoOpen: false,
@@ -89,25 +98,19 @@ var Stats = (function(){
       resizable: false,
       dialogClass: 'dialogCool',
       closeOnEscape: true,
-      width: ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.5 : 0.3 ) )
+      width: ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.5 : 0.3 ) ),
+      position
     });
     $('#resetBtn').click(() => {
       reset();
       refresh();
     });
-  }
-  function refresh(){
-    let stats = Stats.getStats();
-    $('#stats-nbWin').text(stats.nbWin);
-    $('#stats-nbLose').text(stats.nbLose);
-    $('#stats-maxConsWin').text(stats.maxConsWin);
-    $('#stats-curConsWin').text(stats.curConsWin);
-    $('#stats-avgWinTime').text(stats.avgWinTime);
+    $(window).on("window:resize", () => $('#dialogStats').dialog({position}));
+    }
+  function handleOpen() {
+    refresh();
     $('#dialogStats').dialog('open');
   }
-  return {getStats, gameWon, startGame, cardMoved, reset, refresh, init};
+  return {gameWon, startGame, cardMoved, handleOpen, init};
 })();
 
-function handleStatsOpen() {
-  Stats.refresh();
-}

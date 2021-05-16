@@ -24,7 +24,8 @@
 	<meta name="keywords" content="Freecell Solitaire Card Game, iOS web app, iPad game, mobile web app, html5 card game, free mobile game, free mobile card game">
 
 	<link href='https://fonts.googleapis.com/css?family=Cinzel+Decorative:700' rel='stylesheet' type='text/css'>
-
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
 	<link rel="stylesheet" type="text/css" href="js/jquery-ui-1.11.4/jquery-ui.min.css">
 	<link rel="stylesheet" type="text/css" href="css/playingcards.css">
 	<link rel="stylesheet" type="text/css" href="css/FreecellJS.css">
@@ -40,18 +41,19 @@
 	<script type="text/javascript" src="js/menu.js"></script>
 	<script type="text/javascript" src="js/stats.js"></script>
 	<script type="text/javascript" src="js/deals.js"></script>
+	<script type="text/javascript" src="js/options.js"></script>
 </head>
 <body><div class="content">
   <div id="dialogMenu" style="display:none">
     <div class="bigText">Game #</div>
     <div class="bigBtnBar">
-      <button id="menuPlayBtn" class="green highlight" onclick="handleOptionsNewGame()">Play</button>
-      <button id="menuNewBtn" class="red" onclick="handleOptionsNewGame()">Play</button>
-      <button id="menuRetryBtn" class="red" onclick="handleOptionsRetry()">Retry</button>
+      <button id="menuPlayBtn" class="green highlight" onclick="Menu.handleNewGame()">Play</button>
+      <button id="menuNewBtn" class="red" onclick="Menu.handleNewGame()">Play</button>
+      <button id="menuRetryBtn" class="red" onclick="Menu.handleRetry()">Retry</button>
       <div class="horizontalBtn">
-        <button class="blue" onclick="handleOptionsOpen()">Options</button>
-        <button class="blue" onclick="handleStatsOpen()">Stats</button>
-        <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')">How To Play</button>
+        <button class="blue" onclick="Options.handleOpen()"><span class="material-icons">settings</span></button>
+        <button class="blue" onclick="Stats.handleOpen()"><span class="material-icons">leaderboard</span></button>
+        <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')"><span class="material-icons">help</span></button>
       </div>
       <button id="menuResumeBtn"  class="green" onclick="$('#dialogMenu').dialog('close');">Resume</button>
     </div>
@@ -69,7 +71,7 @@
 		</fieldset>
 
 		<div style="margin:20px 0 0 0;">
-			<button class="coolBtn small" onclick="handleOptionsClose()">Close</button>
+			<button class="coolBtn small" onclick="Options.handleClose()">Close</button>
 		</div>
 	</div>
 
@@ -108,7 +110,7 @@
 	</div>
 
   <div id="topBar">
-    <button onclick="handleMenuOpen()">MENU</button>
+    <button onclick="Menu.handleOpen()">MENU</button>
     <div><div class="red">♥</div></div>
     <div id="title">FREECELL</div>
     <div><div class="blk">♣</div></div>
@@ -128,7 +130,7 @@
 				<div><div class="red">♥</div><div class="blk">♠</div></div>
 				<div id="title">FREECELL</div>
 				<div><div class="blk">♣</div><div class="red">♦</div></div>
-				<button id="btnMenu" onclick="handleMenuOpen()">MENU</button>
+				<button id="btnMenu" onclick="Menu.handleOpen()">MENU</button>
 			</div>
 			<div id="cardFoun" style="width:45%">
 				<div id="cardFounCont">

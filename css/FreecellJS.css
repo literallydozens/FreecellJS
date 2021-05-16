@@ -153,7 +153,12 @@ button.coolBtn.small {
     text-shadow: 5px 5px 10px rgba(0,0,0,0.7);
 }
 
-#dialogOptions { font-family: 'Open Sans Light'; color: white; padding:20px; }
+#dialogOptions { 
+  font-family: 'Open Sans Light'; 
+  color: white; 
+  padding:20px; 
+  overflow: hidden;
+}
 #dialogOptions button.coolBtn { background:linear-gradient(to bottom, #03BBE5 0%,#0288D4 100%); }
 
 #dialogOptions div.label {
@@ -215,14 +220,14 @@ button.coolBtn.small {
     text-align: center;
 }
 .bigBtnBar button {
-    width: 85%;
-    margin: 5px 0;
-    font-size:1.5em; color:white; letter-spacing: 0.1em;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-	background-color:#77b55a; background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-	border-radius:10px; border:1px solid #4b8f29;
-	padding:20px 10px;
-	text-shadow:0px 1px 0px #5b8a3c;
+  width: 85%;
+  margin: 5px 0;
+  font-size:1.5em; color:white; letter-spacing: 0.1em;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+  background-color:#77b55a; background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
+  border-radius:10px; border:1px solid #4b8f29;
+  padding:20px 10px;
+  text-shadow:0px 1px 0px #5b8a3c;
 }
 .bigBtnBar button:hover { transform: scale(1.05); transition: .25s ease-in; }
 .bigBtnBar button.red { background:linear-gradient(to bottom, #D21615 0%,#BC1317 100%); border-color: #BC1317; }
@@ -234,6 +239,22 @@ button.coolBtn.small {
   font-size: 3em;
   letter-spacing: 0.1em;
 }
+
+.horizontalBtn {
+  margin-left: 7.5%;
+  margin-right: 7.5%;
+}
+    
+.horizontalBtn button {
+  width: 75px;
+}
+
+.horizontalBtn:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
 /* --------------------------------------------------------------------------------------------- */
 
 #playArea {
@@ -428,12 +449,29 @@ h1, .card, div#gameTitle {
 }
 
 @media only screen and (max-width: 700px) {
-    #playArea { padding:15px; }
-    #topArea { margin-bottom: 15px; }
-    
-    .bigText { font-size: 2.5em; }
+  #playArea { padding:15px; }
+  #topArea { margin-bottom: 15px; }
+  
+  .bigText { font-size: 2.5em; }
+  .horizontalBtn button {
+    width: 50px;
+    padding: 10px 10px;
+  }
 }
 
-@media only screen and (max-width: 550px) {    
-    .bigText { font-size: 1.5em; }
+@media only screen and (max-width: 550px) {
+  .bigText { font-size: 1.5em; }
+}
+
+@media only screen and (max-width: 500px) {
+  .horizontalBtn button {
+    width: 40px;
+    padding: 5px 5px;
+  }
+  .bigBtnBar button.highlight {
+    font-size: 2.5em;
+  }
+  .material-icons {
+    font-size: 16px;
+  }
 }
