@@ -109,7 +109,7 @@
 @media only screen and (max-width: 500px) {
     .card .corner        { font-size: 1.75em; }
     .card .corner.top    span,
-    .card .corner.bottom span { margin-bottom: 1.5em; }
+    .card .corner.bottom span { font-size: 2em; margin-bottom: 1.5em; }
     .card .corner.top    span.number,
     .card .corner.bottom span.number { font-size: 2em; }
 }

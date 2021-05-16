@@ -48,9 +48,11 @@
       <button id="menuPlayBtn" class="green highlight" onclick="handleOptionsNewGame()">Play</button>
       <button id="menuNewBtn" class="red" onclick="handleOptionsNewGame()">Play</button>
       <button id="menuRetryBtn" class="red" onclick="handleOptionsRetry()">Retry</button>
-      <button class="blue" onclick="handleOptionsOpen()">Options</button>
-      <button class="blue" onclick="handleStatsOpen()">Stats</button>
-      <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')">How To Play</button>
+      <div class="horizontalBtn">
+        <button class="blue" onclick="handleOptionsOpen()">Options</button>
+        <button class="blue" onclick="handleStatsOpen()">Stats</button>
+        <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')">How To Play</button>
+      </div>
       <button id="menuResumeBtn"  class="green" onclick="$('#dialogMenu').dialog('close');">Resume</button>
     </div>
   </div>

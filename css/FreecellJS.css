@@ -434,3 +434,6 @@ h1, .card, div#gameTitle {
     .bigText { font-size: 2.5em; }
 }
 
+@media only screen and (max-width: 550px) {    
+    .bigText { font-size: 1.5em; }
+}
