@@ -46,6 +46,7 @@ let gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function showTips(text){
   if(!Options.showTips)
     return;
+  console.log(text);
   // TODO !
 }
 
@@ -182,6 +183,16 @@ function checkCascDrop(ui,drop){
     showTips("This card, or stack of card don't follow the correct sequence order");
     return false;
   }
+  // RULE 2: Ensure enough free slots existing to handle number of cards being dragged
+  let dropIsFreeCasc = (drop.children().length == 0);
+  let nbFreeOpen = $('#cardOpen .slot:empty').length;
+  let nbFreeCasc = $('#cardCasc>div:empty').length - (dropIsFreeCasc?1:0);
+  let maxCards = (nbFreeCasc ? (2 << (nbFreeCasc-1)) : 1)*(nbFreeOpen+1);
+  let nbCards = (ui.helper.prop('id') == 'draggingContainer' ? ui.helper.children().length : 1);
+  if(nbCards > maxCards){
+    showTips("Not enough free slots to move the cards");
+    return false;
+  }
   return true;
 }
 
@@ -261,16 +272,6 @@ function handleDragStart(event, ui){
         }
       }
       prevCard = card;
-    }
-  }
-
-  // RULE 2: Ensure enough free slots existing to handle number of cards being dragged
-  if ( ui.helper.prop('id') == 'draggingContainer' && ui.helper.children().length > 1 ) {
-    if ( (ui.helper.children().length - 1) > (4 - $('#cardOpen .card').length) ) {
-      showTips("Not enough free slots to move the cards");
-      // Disallow drag start
-      handleDragStop(event, ui);
-      return false;
     }
   }
 }
@@ -366,7 +367,7 @@ function playSound(objSound) {
 
 function cascHelper() {
   // A: Build container and fill with cards selected
-  var container = $('<div/>').attr('id', 'draggingContainer').addClass('cardCont');
+  let container = $('<div/>').attr('id', 'draggingContainer').addClass('cardCont');
   container.css( 'position', 'absolute' );
   container.css( 'z-index', '100' );
   container.css( 'top' , $(this).offset().top +'px' );
@@ -380,7 +381,6 @@ function cascHelper() {
   $(this).nextAll().hide();
 
   // C: "Cascade" cards in container to match orig style
-  // REQD! We have to do this as we use negative margins to stack cards above, else they'll go up in this container and look all doofy
   let cardOffset = getCardOffset();
   container.find('div.card').each(function(i){ $(this).css('position', 'absolute').css('top', (i*cardOffset)+'px'); });
 
@@ -439,15 +439,16 @@ function doFillBoard(gameNumber) {
   // STEP 1: VFX/SFX
   playSound(gGameSounds.cardShuffle);
   
-  // STEP 2: Remove all cards
+  // STEP 2: Remove all cards and re enable free slot
   $('.card').remove();
+  $('#cardOpen .slot').droppable('enable')
   
   // STEP 3: Choose dealing method
   if(!gameNumber)
     gameNumber = 1+Math.floor(32000*Math.random());
   Menu.setRunningGame(gameNumber);
   let method = Deals.standard.bind(null,gameNumber);
-  //let method = Deals.debug;
+  //method = Deals.debug2;
 
   // STEP 3: Deal the cards
   let cardOffset = getCardOffset(); 
@@ -506,7 +507,7 @@ function doGameWon() {
   Stats.gameWon();
   
   // STEP 4:
-  handleMenuOpen("win");
+  Menu.handleOpen("win");
 }
 
 function loadSounds() {

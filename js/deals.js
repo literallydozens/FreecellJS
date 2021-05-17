@@ -33,5 +33,13 @@ let Deals = (function(){
     let invNumbs = numbs.slice().reverse();
     suits.forEach((s, i) => invNumbs.forEach(n => cbDeal(i+1, n+"-"+s)));
   }
-  return {standard, debug};
+  function debug2(cbDeal){
+    cbDeal = addCounterToCb(cbDeal);
+    let invNumbs = numbs.slice().reverse();
+    invNumbs.forEach((n,i) => cbDeal(1, n+"-"+["club","diamond"][i%2]));
+    invNumbs.forEach((n,i) => cbDeal(2, n+"-"+["diamond","club"][i%2]));
+    invNumbs.forEach((n,i) => cbDeal(3, n+"-"+["heart","spade"][i%2]));
+    invNumbs.forEach((n,i) => cbDeal(4, n+"-"+["spade","heart"][i%2]));
+  }
+  return {standard, debug, debug2};
 })();
