@@ -43,8 +43,22 @@ let gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // ==============================================================================================
 
+
+let lockScreen = (function(){
+  let c = 0;
+  return function(){
+    if(c++ == 0)
+      $("#lockScreen").css("display","block");
+    return function(){
+      if(--c == 0)
+        $("#lockScreen").css("display","none");
+    }
+  }
+  
+})();
+
 function showTips(text){
-  if(!Options.showTips)
+  if(!Options.showTips())
     return;
   console.log(text);
   // TODO !
@@ -219,36 +233,46 @@ function handleCascDrop(event, ui, drop) {
   // TODO: measure #playArea and length of children
 }
 
+function animeAutoMove(card, destination, action){
+  let offset = card.offset();
+  let dest = destination.offset();
+  $("body div.content").append(card.detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
+  let unlockScreen = lockScreen()
+  card.animate({left:dest.left+"px", top:dest.top+'px'}, 200, () => { action(); unlockScreen(); });
+}
+
 function handleCardDblClick(card) {
+  card = $(card);
   // RULE 1: Only topmost card can be double-clicked
-  if ( $($(card).parent().find('.card:last-child')[0]).prop('id') != $(card).prop('id') ) return;
+  if ( $(card.parent().find('.card:last-child')[0]).prop('id') != card.prop('id') ) return;
 
   let event = {};
-  let ui = { draggable:$(card), helper:{ children:function(){ return [$(card)]; } } };
+  let ui = { draggable:card, helper:{ children:function(){ return [card]; } } };
   let drop = null;
   
   // are we in the cascades ?
-  if($(card).parents("#cardCasc").length > 0){
+  if(card.parents("#cardCasc").length > 0){
       // CHECK 1: Can card go to foundation?
       drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
       if(drop)
-        return handleFounDrop(event, ui, drop);
+        return animeAutoMove(card, drop, () => handleFounDrop(event, ui, drop));
       
       // CHECK 2: Do we have an open slot to send this card to?
       drop = OPENCELLS.map(id => $(id)).filter(drop => checkOpenDrop(ui, drop))[0];
       if(drop)
-        return handleOpenDrop(event, ui, drop);
+        return animeAutoMove(card, drop, () => handleOpenDrop(event, ui, drop));
   }
   
   // are we in the open slot ?
-  if($(card).parents("#cardOpen").length > 0){
+  if(card.parents("#cardOpen").length > 0){
     // CHECK 1: Can card go to foundation?
     drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui,drop))[0];
     if(drop){
-      $(card).trigger("dragstart");
-      return handleFounDrop(event, ui, drop);
+      card.trigger("dragstart");
+      return animeAutoMove(card, drop, () => handleFounDrop(event, ui, drop));
     }
   }
+  
 }
 
 /**
@@ -321,7 +345,7 @@ function moveCardToFoundation(card){
   let drop = FOUNDATIONS.map(id => $(id)).filter(drop => checkFounDrop(ui, drop))[0];
   if(!drop)
     return false;
-  handleFounDrop({}, ui, drop);
+  animeAutoMove(card, drop, () => handleFounDrop({}, ui, drop));
   return true;
 }
 
@@ -343,7 +367,7 @@ function handleStartBtn() {
 
 function playSound(objSound) {
   // SRC: http://www.html5rocks.com/en/tutorials/webaudio/intro/
-  if(!Options.sound)
+  if(!Options.sound())
     return;
 
   // STEP 1: Reality Check

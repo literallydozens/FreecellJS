@@ -403,6 +403,17 @@ h1, .card, div#gameTitle {
             user-select: none;
 }
 
+#lockScreen {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 /* --------------------------------------------------------------------------------------------- */
 
 /* Responsive Rules: 1281-1400=PC */
