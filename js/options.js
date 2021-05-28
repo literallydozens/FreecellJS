@@ -1,6 +1,6 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console */
-/* exported handleMenuOpen, handleOptionsNewGame, handleOptionsRetry, Menu */
+/* global $ */
+/* exported Options */
 
 var Options = (function(){
   // SETUP: Table backgrounds

@@ -1,47 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<!--
-	| /*******************************************************************************
-	|  name: FreecellJS
-	|  file: FreecellJS.html
-	|
-	|  Copyright (c) 2015-2016. Brent Ely;
-	|  https://github.com/gitbrent/
-	|
-	|  Licences: MIT
-	|  http://www.opensource.org/licenses/mit-license.php
-	|  ******************************************************************************/
-	-->
-	<title>Freecell-JS :: Online/Offline Freecell Solitaire Card Game</title>
-	<link rel="icon" href="img/favicon.png">
-	<link rel="apple-touch-icon" href="img/favicon.png">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="author" content="https://github.com/gitbrent/">
-	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-	<meta name="description" content="HTML5 Freecell Solitaire Card Game for iPad/Android and Desktop Web Browsers">
-	<meta name="keywords" content="Freecell Solitaire Card Game, iOS web app, iPad game, mobile web app, html5 card game, free mobile game, free mobile card game">
+  <!--
+  | /*******************************************************************************
+  |  name: FreecellJS
+  |  file: FreecellJS.html
+  |
+  |  Copyright (c) 2015-2016. Brent Ely;
+  |  https://github.com/gitbrent/
+  |  Copyright (c) 2021-2021. Mathieu Croquelois;
+  |  https://github.com/croquelois/
+  |
+  |  Licences: MIT
+  |  http://www.opensource.org/licenses/mit-license.php
+  |  ******************************************************************************/
+  -->
+  <title>Freecell-JS :: Online/Offline Freecell Solitaire Card Game</title>
+  <link rel="icon" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/favicon.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="author" content="https://github.com/gitbrent/">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="HTML5 Freecell Solitaire Card Game for iPad/Android and Desktop Web Browsers">
+  <meta name="keywords" content="Freecell Solitaire Card Game, iOS web app, iPad game, mobile web app, html5 card game, free mobile game, free mobile card game">
 
-	<link href='https://fonts.googleapis.com/css?family=Cinzel+Decorative:700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Cinzel+Decorative:700' rel='stylesheet' type='text/css'>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
-	<link rel="stylesheet" type="text/css" href="js/jquery-ui-1.11.4/jquery-ui.min.css">
-	<link rel="stylesheet" type="text/css" href="css/playingcards.css">
-	<link rel="stylesheet" type="text/css" href="css/FreecellJS.css">
-	<link rel="stylesheet" type="text/css" href="css/ResponsiveCards.css">
+  <link rel="stylesheet" type="text/css" href="js/jquery-ui-1.11.4/jquery-ui.min.css">
+  <link rel="stylesheet" type="text/css" href="css/playingcards.css">
+  <link rel="stylesheet" type="text/css" href="css/FreecellJS.css">
+  <link rel="stylesheet" type="text/css" href="css/ResponsiveCards.css">
 
-	<script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="js/jquery-migrate-3.0.0.min.js"></script>
-	<script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script>
+  <script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="js/jquery-migrate-3.0.0.min.js"></script>
+  <script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script>
 
-	<script type="text/javascript" src="js/utils.js"></script>
-	<script type="text/javascript" src="js/main.js"></script>
-	<script type="text/javascript" src="js/menu.js"></script>
-	<script type="text/javascript" src="js/stats.js"></script>
-	<script type="text/javascript" src="js/deals.js"></script>
-	<script type="text/javascript" src="js/options.js"></script>
+  <script type="text/javascript" src="js/utils.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+  <script type="text/javascript" src="js/menu.js"></script>
+  <script type="text/javascript" src="js/stats.js"></script>
+  <script type="text/javascript" src="js/deals.js"></script>
+  <script type="text/javascript" src="js/options.js"></script>
+  <script type="text/javascript" src="js/sound.js"></script>
 </head>
 <body><div class="content">
   <div id="lockScreen"></div>
@@ -57,30 +60,35 @@
         <button class="blue" onclick="Stats.handleOpen()"><span class="material-icons">leaderboard</span></button>
         <button class="blue" onclick="window.open('http://cardgameheaven.com/single-player-games/freecell-solitaire.html','_blank')"><span class="material-icons">help</span></button>
       </div>
-      <button id="menuResumeBtn"  class="green" onclick="$('#dialogMenu').dialog('close');">Resume</button>
+      <button id="menuResumeBtn" class="green" onclick="$('#dialogMenu').dialog('close');">Resume</button>
     </div>
   </div>
 
-	<div id="dialogOptions" style="display:none">
-		<div class="label">Sound</div>
-		<fieldset>
-			<label for="chkOptSound"><input id="chkOptSound" type="checkbox" checked="checked"> Play Sounds</label>
-		</fieldset>
+  <div id="dialogSeed" style="display:none">
+    <label for="chkOptSound">Seed <input id="seed" type="text" size="6"></label>
+    <button class="coolBtn small green highlight" onclick="Menu.handleNewSeedGame()">PLAY !</button>
+  </div>
+  
+  <div id="dialogOptions" style="display:none">
+    <div class="label">Sound</div>
+    <fieldset>
+      <label for="chkOptSound"><input id="chkOptSound" type="checkbox" checked="checked"> Play Sounds</label>
+    </fieldset>
 
-		<div class="label">Table Background</div>
-		<fieldset>
-			<div id="optBkgds" class="tableRows"></div>
-		</fieldset>
+    <div class="label">Table Background</div>
+    <fieldset>
+      <div id="optBkgds" class="tableRows"></div>
+    </fieldset>
 
-		<div style="margin:20px 0 0 0;">
-			<button class="coolBtn small" onclick="Options.handleClose()">Close</button>
-		</div>
-	</div>
+    <div style="margin:20px 0 0 0;">
+      <button class="coolBtn small" onclick="Options.handleClose()">Close</button>
+    </div>
+  </div>
 
-	<div id="dialogStats" style="display:none">
-		<div class="label">Statistics</div>
-		<fieldset>
-			<div id="stats" class="tableRows">
+  <div id="dialogStats" style="display:none">
+    <div class="label">Statistics</div>
+    <fieldset>
+      <div id="stats" class="tableRows">
         <div>
           <div id="stats-nbWin"></div>
           <div><div class="label">Game won</div></div>
@@ -102,14 +110,14 @@
           <div><div class="label">Average time to win</div></div>
         </div>
       </div>
-		</fieldset>
+    </fieldset>
     <div style="margin:20px 0 0 0;">
-			<button id="resetBtn" class="coolBtn small">Reset</button>
-		</div>
-		<div style="margin:20px 0 0 0;">
-			<button class="coolBtn small" onclick="$('#dialogStats').dialog('close');">Close</button>
-		</div>
-	</div>
+      <button id="resetBtn" class="coolBtn small">Reset</button>
+    </div>
+    <div style="margin:20px 0 0 0;">
+      <button class="coolBtn small" onclick="$('#dialogStats').dialog('close');">Close</button>
+    </div>
+  </div>
 
   <div id="topBar">
     <button onclick="Menu.handleOpen()">MENU</button>
@@ -118,32 +126,32 @@
     <div><div class="blk">♣</div></div>
   </div>
   
-	<div id="playArea">
-		<div id="topArea">
-			<div id="cardOpen" style="width:45%">
-				<div id="cardOpenCont">
-					<div><div id="cardOpen1" class="slot"></div></div>
-					<div><div id="cardOpen2" class="slot"></div></div>
-					<div><div id="cardOpen3" class="slot"></div></div>
-					<div><div id="cardOpen4" class="slot"></div></div>
-				</div>
-			</div>
-			<div id="gameTitle" style="width:10%">
-				<div><div class="red">♥</div><div class="blk">♠</div></div>
-				<div id="title">FREECELL</div>
-				<div><div class="blk">♣</div><div class="red">♦</div></div>
-				<button id="btnMenu" onclick="Menu.handleOpen()">MENU</button>
-			</div>
-			<div id="cardFoun" style="width:45%">
-				<div id="cardFounCont">
-					<div><div id="cardFoun1" class="slot"><h1>A</h1></div></div>
-					<div><div id="cardFoun2" class="slot"><h1>A</h1></div></div>
-					<div><div id="cardFoun3" class="slot"><h1>A</h1></div></div>
-					<div><div id="cardFoun4" class="slot"><h1>A</h1></div></div>
-				</div>
-			</div>
-		</div>
-		<div id="cardCasc">
+  <div id="playArea">
+    <div id="topArea">
+      <div id="cardOpen" style="width:45%">
+        <div id="cardOpenCont">
+          <div><div id="cardOpen1" class="slot"></div></div>
+          <div><div id="cardOpen2" class="slot"></div></div>
+          <div><div id="cardOpen3" class="slot"></div></div>
+          <div><div id="cardOpen4" class="slot"></div></div>
+        </div>
+      </div>
+      <div id="gameTitle" style="width:10%">
+        <div><div class="red">♥</div><div class="blk">♠</div></div>
+        <div id="title">FREECELL</div>
+        <div><div class="blk">♣</div><div class="red">♦</div></div>
+        <button id="btnMenu" onclick="Menu.handleOpen()">MENU</button>
+      </div>
+      <div id="cardFoun" style="width:45%">
+        <div id="cardFounCont">
+          <div><div id="cardFoun1" class="slot"><h1>A</h1></div></div>
+          <div><div id="cardFoun2" class="slot"><h1>A</h1></div></div>
+          <div><div id="cardFoun3" class="slot"><h1>A</h1></div></div>
+          <div><div id="cardFoun4" class="slot"><h1>A</h1></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="cardCasc">
       <div id="cardCasc1"></div>
       <div id="cardCasc2"></div>
       <div id="cardCasc3"></div>
@@ -153,6 +161,6 @@
       <div id="cardCasc7"></div>
       <div id="cardCasc8"></div>
     </div>
-	</div>
+  </div>
 </div></body>
 </html>

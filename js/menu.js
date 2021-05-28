@@ -1,5 +1,5 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console, playSound */
+/* global $, Sound, doFillBoard */
 /* exported Menu */
 
 var Menu = (function(){
@@ -18,7 +18,18 @@ var Menu = (function(){
       width: "60%",
       position
     });
+    $('#dialogSeed').dialog({
+      modal: true,
+      autoOpen: false,
+      draggable: false,
+      resizable: false,
+      dialogClass: 'dialogCool',
+      closeOnEscape: false,
+      width: "50%",
+      position
+    });
     $(window).on("window:resize", () => $('#dialogMenu').dialog({position}));
+    $(window).on("window:resize", () => $('#dialogSeed').dialog({position}));
   }
   function setRunningGame(runGameNumber){
     gameNumber = runGameNumber;
@@ -54,14 +65,16 @@ var Menu = (function(){
   }
 
   function handleNewGame() {
+    if(false)
+      return $('#dialogSeed').dialog('open');
     if(runningGame)
-      playSound(gGameSounds.sadTrombone);
+      Sound.play("sadTrombone");
     $('#dialogMenu').dialog('close');
     doFillBoard();
   }
 
   function handleRetry() {
-    playSound(gGameSounds.sadTrombone);
+    Sound.play("sadTrombone");
     $('#dialogMenu').dialog('close');
     doFillBoard(gameNumber);
   }

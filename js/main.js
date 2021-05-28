@@ -1,6 +1,6 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console, Stats, Deals, Menu, handleMenuOpen */
-/* exported handleOptionsOpen, handleOptionsClose, handleOptionsNewGame */
+/* global $, console, Stats, Deals, Menu, Options, Sound */
+/* exported handleOptionsOpen, handleOptionsClose, handleOptionsNewGame, doFillBoard */
 
 // CONSTS
 const FOUNDATIONS = ['#cardFoun1','#cardFoun2','#cardFoun3','#cardFoun4'];
@@ -27,20 +27,6 @@ const NUMB_DICT = {
   K: { cascDrop:'Q' , founDrop:''  }
 };
 
-// GLOBAL VARIABLES
-let gAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-// GAME SETUP
-{
-
-  // SETUP: Define / Start async load of sounds files
-  // NOTE: iOS (as of iOS9) is unable to play ogg files, so we are using MP3 for everything
-  var gGameSounds = {};
-  gGameSounds.cardFlip    = { buffer:null, url:'sounds/cardFlip.mp3',    src:'freesound.org/people/f4ngy/sounds/240776/'    };
-  gGameSounds.cardShuffle = { buffer:null, url:'sounds/cardShuffle.mp3', src:'freesound.org/people/deathpie/sounds/19245/'  };
-  gGameSounds.crowdCheer  = { buffer:null, url:'sounds/crowdCheer.mp3',  src:'soundbible.com/1700-5-Sec-Crowd-Cheer.html'   };
-  gGameSounds.sadTrombone = { buffer:null, url:'sounds/sadTrombone.mp3', src:'freesound.org/people/Benboncan/sounds/73581/' };
-}
-
 // ==============================================================================================
 
 
@@ -52,9 +38,8 @@ let lockScreen = (function(){
     return function(){
       if(--c == 0)
         $("#lockScreen").css("display","none");
-    }
-  }
-  
+    };
+  };
 })();
 
 function showTips(text){
@@ -138,7 +123,7 @@ function handleFounDrop(event, ui, drop) {
     return false;
   
   // STEP 1: VFX/SFX update
-  playSound(gGameSounds.cardFlip);
+  Sound.play("cardFlip");
 
   // STEP 2: Place it into this foundation
   let zIndex = $(drop).find('.card').length;
@@ -170,7 +155,7 @@ function handleOpenDrop(event, ui, drop) {
     return false;
   
   // STEP 1: VFX/SFX update
-  playSound(gGameSounds.cardFlip);
+  Sound.play("cardFlip");
   
   // STEP 2: Place it in the free cell
   let newCard = dropCard(ui.draggable, $(drop), 99);
@@ -215,7 +200,7 @@ function handleCascDrop(event, ui, drop) {
     return false;
 
   // STEP 1: VFX/SFX update
-  playSound(gGameSounds.cardFlip);
+  Sound.play("cardFlip");
 
   // STEP 2: Place cards into this cascade
   let cards = ( ui.helper.prop('id') == 'draggingContainer' ) ? ui.helper.children() : [ui.draggable];
@@ -237,7 +222,7 @@ function animeAutoMove(card, destination, action){
   let offset = card.offset();
   let dest = destination.offset();
   $("body div.content").append(card.detach().css({"position":"absolute", left:offset.left+"px", top:offset.top+"px"}));
-  let unlockScreen = lockScreen()
+  let unlockScreen = lockScreen();
   card.animate({left:dest.left+"px", top:dest.top+'px'}, 200, () => { action(); unlockScreen(); });
 }
 
@@ -359,36 +344,6 @@ function tryToFillFoundation(){
 
 // ==============================================================================================
 
-function handleStartBtn() {
-  $('#dialogStart').dialog('close');
-  playSound(gGameSounds.cardShuffle);
-  doFillBoard();
-}
-
-function playSound(objSound) {
-  // SRC: http://www.html5rocks.com/en/tutorials/webaudio/intro/
-  if(!Options.sound())
-    return;
-
-  // STEP 1: Reality Check
-  if ( !objSound.buffer ) {
-    console.warn('WARN: No buffer exists for: '+objSound.url);
-    console.log(objSound.buffer);
-    return;
-  }
-
-  // STEP 2: Create new bufferSource with existing file buffer and play sound
-  var source = gAudioCtx.createBufferSource();
-  source.buffer = objSound.buffer;
-  source.connect(gAudioCtx.destination);
-  if(source.start)
-    source.start(0);
-  else
-    source.noteOn(0);
-}
-
-// ==============================================================================================
-
 function cascHelper() {
   // A: Build container and fill with cards selected
   let container = $('<div/>').attr('id', 'draggingContainer').addClass('cardCont');
@@ -461,11 +416,11 @@ function buildCard(numb, suit){
 
 function doFillBoard(gameNumber) {
   // STEP 1: VFX/SFX
-  playSound(gGameSounds.cardShuffle);
+  Sound.play("cardShuffle");
   
   // STEP 2: Remove all cards and re enable free slot
   $('.card').remove();
-  $('#cardOpen .slot').droppable('enable')
+  $('#cardOpen .slot').droppable('enable');
   
   // STEP 3: Choose dealing method
   if(!gameNumber)
@@ -522,7 +477,7 @@ function winAnimation(){
 
 function doGameWon() {
   // STEP 1: VFX/SFX update
-  playSound(gGameSounds.crowdCheer);
+  Sound.play("crowdCheer");
 
   // STEP 2: Win animation
   winAnimation();
@@ -532,25 +487,6 @@ function doGameWon() {
   
   // STEP 4:
   Menu.handleOpen("win");
-}
-
-function loadSounds() {
-  // SEE: https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/decodeAudioData (most up-to-date source)
-  // SEE: http://www.html5rocks.com/en/tutorials/webaudio/intro/
-
-  // STEP 1: Load each sound
-  $.each(gGameSounds, function(key,sound){
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', sound.url, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = function(){
-      if (this.status == 0 || this.status == 200)
-        gAudioCtx.decodeAudioData(xhr.response, function(buffer){ sound.buffer = buffer; }, onError);
-    };
-    xhr.send();
-  });
-
-  function onError(e){ console.error("Unable to load sound. "+e); }
 }
 
 function getCardOffset(){
@@ -610,11 +546,6 @@ function doRespLayout() {
 }
 
 $(function() {
-  //alert($(window).innerWidth());
-  // STEP 1: Start async load of sound files
-  loadSounds();
-
-  // STEP 2: Setup 3 core droppable areas
   $('#cardFoun .slot').droppable({
     accept:     '.card',
     hoverClass: 'hvr-pulse-grow-hover',
@@ -634,7 +565,7 @@ $(function() {
     drop:       function(event,ui){ handleCascDrop(event, ui, $(this)); }
   });
   
-  // STEP 3: Add handler for window resize (use a slight delay for PERF)
+  // Add handler for window resize (use a slight delay for PERF)
   let gTimer;
   window.onresize = () => { 
     clearTimeout(gTimer); 
@@ -642,32 +573,10 @@ $(function() {
   };
   $(window).on("window:resize", doRespLayout());
 
-  // STEP 4: Web-Audio for iOS
-  $(document).on('touchstart', '#btnStart', function(){
-    // A: Create and play a dummy sound to init sound in iOS
-    // NOTE: iOS (iOS8+) mutes all sounds until a touch is detected (good on you Apple!), so we have to do this little thing here
-    var buffer = gAudioCtx.createBuffer(1, 1, 22050); // create empty buffer
-    var source = gAudioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(gAudioCtx.destination); // connect to output (your speakers)
-    if(source.start)
-      source.start(0);
-    else
-      source.noteOn(0);
-
-    // B: Start game
-    handleStartBtn();
-  });
-
-  // STEP 5: Initialise options popup
   Options.init();
-  
-  // STEP 6: Initialise menu popup
   Menu.init();
-  
-  // STEP 7: Initialise statistics popup
   Stats.init();
-  
-  // STEP 8: Launch start popup
+  Sound.init();
+
   Menu.handleOpen("start");
 });

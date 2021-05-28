@@ -153,19 +153,28 @@ button.coolBtn.small {
     text-shadow: 5px 5px 10px rgba(0,0,0,0.7);
 }
 
-#dialogOptions { 
+#dialogOptions, #dialogSeed { 
   font-family: 'Open Sans Light'; 
   color: white; 
   padding:20px; 
   overflow: hidden;
 }
-#dialogOptions button.coolBtn { background:linear-gradient(to bottom, #03BBE5 0%,#0288D4 100%); }
+#dialogSeed {
+  font-size: 1.5em;
+  text-align: center;
+}
+#dialogSeed button {
+  width: unset;
+}
+#dialogOptions button.coolBtn {
+  background:linear-gradient(to bottom, #03BBE5 0%,#0288D4 100%); 
+}
 
 #dialogOptions div.label {
-    font-size: 1.5em;
-    color: white;
-    text-align: left;
-    margin-top: 20px;
+  font-size: 1.5em;
+  color: white;
+  text-align: left;
+  margin-top: 20px;
 }
 #dialogOptions div.label:first-child { margin-top: 0; }
 #dialogOptions fieldset {
@@ -230,15 +239,6 @@ button.coolBtn.small {
   text-shadow:0px 1px 0px #5b8a3c;
 }
 .bigBtnBar button:hover { transform: scale(1.05); transition: .25s ease-in; }
-.bigBtnBar button.red { background:linear-gradient(to bottom, #D21615 0%,#BC1317 100%); border-color: #BC1317; }
-.bigBtnBar button.blue { background:linear-gradient(to bottom, #03BBE5 0%,#0288D4 100%); border-color: #0288D4; }
-.bigBtnBar button.purple { background:linear-gradient(to bottom, #921AD3 0%,#8415C4 100%); border-color: #8415C4; }
-.bigBtnBar button.green { background:linear-gradient(to bottom, #15D418 0%,#17BC14 100%); border-color: #17BC14; }
-.bigBtnBar button.highlight {
-  border:3px solid #e7e7e7;
-  font-size: 3em;
-  letter-spacing: 0.1em;
-}
 
 .horizontalBtn {
   margin-left: 7.5%;
@@ -253,6 +253,16 @@ button.coolBtn.small {
   content: "";
   clear: both;
   display: table;
+}
+
+button.red { background:linear-gradient(to bottom, #D21615 0%,#BC1317 100%); border-color: #BC1317; }
+button.blue { background:linear-gradient(to bottom, #03BBE5 0%,#0288D4 100%); border-color: #0288D4; }
+button.purple { background:linear-gradient(to bottom, #921AD3 0%,#8415C4 100%); border-color: #8415C4; }
+button.green { background:linear-gradient(to bottom, #15D418 0%,#17BC14 100%); border-color: #17BC14; }
+button.highlight {
+  border:3px solid #e7e7e7;
+  font-size: 3em;
+  letter-spacing: 0.1em;
 }
 
 /* --------------------------------------------------------------------------------------------- */
