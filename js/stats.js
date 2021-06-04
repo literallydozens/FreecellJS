@@ -89,6 +89,12 @@ var Stats = (function(){
     $('#stats-curConsWin').text(stats.curConsWin);
     $('#stats-avgWinTime').text(stats.avgWinTime);
   }
+  function getSize(){
+    let winW = $(window).innerWidth();
+    if(winW < 600)
+      return "80%";
+    return 0.8*600;
+  }
   function init(){
     let position = { my: "center", at: "center", of: window };
     $('#dialogStats').dialog({
@@ -98,14 +104,14 @@ var Stats = (function(){
       resizable: false,
       dialogClass: 'dialogCool',
       closeOnEscape: true,
-      width: ( $(window).innerWidth() * ( $(window).innerWidth() < 1080 ? 0.5 : 0.3 ) ),
+      width: getSize(),
       position
     });
     $('#resetBtn').click(() => {
       reset();
       refresh();
     });
-    $(window).on("window:resize", () => $('#dialogStats').dialog({position}));
+    $(window).on("window:resize", () => $('#dialogStats').dialog({position,width:getSize()}));
     }
   function handleOpen() {
     refresh();

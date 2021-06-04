@@ -4,17 +4,18 @@
 
 var Options = (function(){
   // SETUP: Table backgrounds
-  let gGameTableBkgds = {};
-  gGameTableBkgds.pattern = { url:'img/table_pattern.jpg' };
-  gGameTableBkgds.circles = { url:'img/table_circles.jpg' };
-  gGameTableBkgds.felt    = { url:'img/table_felt.jpg'    };
-  gGameTableBkgds.plain   = { url:'img/table_plain.png'   };
+  let gameTableBkgds = {};
+  gameTableBkgds.pattern = { url:'img/table_pattern.jpg' };
+  gameTableBkgds.circles = { url:'img/table_circles.jpg' };
+  gameTableBkgds.felt    = { url:'img/table_felt.jpg'    };
+  gameTableBkgds.plain   = { url:'img/table_plain.png'   };
 
   // SETUP: Game Options / Defaults
-  let gGameOpts = {};
-  gGameOpts.showTips       = false;
-  gGameOpts.sound          = true;
-  gGameOpts.tableBkgdUrl   = gGameTableBkgds.pattern.url;
+  let gameOpts = {};
+  gameOpts.selectSeed     = false;
+  gameOpts.showTips       = false;
+  gameOpts.sound          = true;
+  gameOpts.tableBkgdUrl   = gameTableBkgds.pattern.url;
   
   function init(){
     let position = { my: "center", at: "center", of: window };    
@@ -30,31 +31,41 @@ var Options = (function(){
     });
     $(window).on("window:resize", () => $('#dialogOptions').dialog({position}));
     if(localStorage.tableBkgdUrl)
-      gGameOpts.tableBkgdUrl = localStorage.tableBkgdUrl;
-    $('body').css('background', 'url("'+ gGameOpts.tableBkgdUrl +'")');
+      gameOpts.tableBkgdUrl = localStorage.tableBkgdUrl;
+    $('body').css('background', 'url("'+ gameOpts.tableBkgdUrl +'")');
     if(localStorage.sound)
-      gGameOpts.sound = (localStorage.sound == "true");
-    $('#chkOptSound').prop('checked', gGameOpts.sound);
-    $.each(gGameTableBkgds, function(i,obj){
-      let strHtml = '<div>' +
-            '  <div><input id="radBkgd'+i+'" name="radBkgd" type="radio" data-url="'+ obj.url +'" ' +
-            (gGameOpts.tableBkgdUrl == obj.url ? ' checked="checked"' : '') + '></div>' +
-            '  <div><label for="radBkgd'+i+'"><div style="background:url(\''+ obj.url +'\'); width:100%; height:60px;"></div></div>' +
-            '</div>';
-
-      $('#optBkgds').append( strHtml );
+      gameOpts.sound = (localStorage.sound == "true");
+    if(localStorage.showTips)
+      gameOpts.showTips = (localStorage.showTips == "true");
+    if(localStorage.selectSeed)
+      gameOpts.selectSeed = (localStorage.selectSeed == "true");
+    $('#chkOptSound').prop('checked', gameOpts.sound);
+    $.each(gameTableBkgds, function(i,obj){
+      let radioBtn = $("<input>").attr("name", "radBkgd").attr("type", "radio");
+      radioBtn.attr("id", "radBkgd-"+i);
+      radioBtn.attr("data-url", obj.url);
+      radioBtn.prop("checked", gameOpts.tableBkgdUrl == obj.url);
+      let radioDiv = $("<div>").append(radioBtn);
+      let imageDiv = $("<div>");
+      imageDiv.css("width","100%");
+      imageDiv.css("height","60px");
+      imageDiv.css("background","url('" + obj.url + "')");
+      let label = $("<label>").append(imageDiv);
+      label.attr("for", "radBkgd-"+i);
+      let backgroundDiv = $("<div>").append(label);
+      $('#optBkgds').append($("<div>").append(radioDiv).append(backgroundDiv));
     });
   }
 
   function handleOpen() {
-    $('#chkOptSound').prop('checked', gGameOpts.sound);
+    $('#chkOptSound').prop('checked', gameOpts.sound);
     $('#dialogOptions').dialog('open');
   }
 
   function handleClose() {
     // STEP 1: Update game options
-    gGameOpts.sound = $('#chkOptSound').prop('checked');
-    localStorage.sound = (gGameOpts.sound?"true":"false");
+    gameOpts.sound = $('#chkOptSound').prop('checked');
+    localStorage.sound = (gameOpts.sound?"true":"false");
     
     // STEP 2: Set background
     let strBkgdUrl = $('input[type="radio"][name="radBkgd"]:checked').data('url');
@@ -66,13 +77,17 @@ var Options = (function(){
   }
   
   function sound(){
-    return gGameOpts.sound;
+    return gameOpts.sound;
   }
   
   function showTips(){
-    return gGameOpts.showTips;
+    return gameOpts.showTips;
+  }
+  
+  function selectSeed(){
+    return gameOpts.selectSeed;
   }
 
-  return {handleOpen, handleClose, sound, showTips, init};
+  return {handleOpen, handleClose, sound, showTips, selectSeed, init};
 })();
 
