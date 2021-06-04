@@ -1,5 +1,5 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, console, Stats, Deals, Menu, Options, Sound */
+/* global $, Stats, Deals, Menu, Options, Sound */
 /* exported handleOptionsOpen, handleOptionsClose, handleOptionsNewGame, doFillBoard */
 
 // CONSTS
@@ -29,7 +29,6 @@ const NUMB_DICT = {
 
 // ==============================================================================================
 
-
 let lockScreen = (function(){
   let c = 0;
   return function(){
@@ -42,12 +41,25 @@ let lockScreen = (function(){
   };
 })();
 
-function showTips(text){
-  if(!Options.showTips())
-    return;
-  console.log(text);
-  // TODO !
-}
+let showTips = (function(){
+  const timingShow = 500;
+  const timingFade = 1000;
+  let timer = null;
+  return function(text){
+    if(!Options.showTips())
+      return;
+    $("#tips p").text(text);
+    function fadeOut(){
+      if(timer)
+        clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        $("#tips").fadeOut();
+      }, timingFade);
+    }
+    $("#tips").show("fade", timingShow, fadeOut);
+  };
+})();
 
 function setupDraggable(card){
   card
@@ -547,7 +559,7 @@ $(function() {
     accept:     '.card',
     hoverClass: 'hvr-pulse-grow-hover',
     tolerance:  'pointer',
-    drop:       function(event,ui){handleFounDrop(event,ui,$(this));}
+    drop:       function(event,ui){ handleFounDrop(event, ui, $(this)); }
   });
   $('#cardOpen .slot').droppable({
     accept:     '.card',
@@ -568,7 +580,7 @@ $(function() {
     clearTimeout(gTimer); 
     gTimer = setTimeout(() => $(window).trigger("window:resize"), 0); 
   };
-  $(window).on("window:resize", doRespLayout());
+  $(window).on("window:resize", doRespLayout);
 
   Options.init();
   Menu.init();

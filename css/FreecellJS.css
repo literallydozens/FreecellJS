@@ -362,7 +362,8 @@ button.highlight {
   width: auto;
   display:inline-block;
   cursor:pointer;
-  background: linear-gradient(to bottom, #77d42a 5%, #5cb811 100%); background-color:#77d42a;
+  background: linear-gradient(to bottom, #77d42a 5%, #5cb811 100%); 
+  background-color:#77d42a;
   border:1px solid #268a16; border-radius:6px;
   box-shadow: inset 0px 1px 0px 0px #caefab;
   font-size: 0.5em; color: #306108; text-decoration: none; text-shadow:0px 2px 0px #aade7c;
@@ -424,6 +425,30 @@ h1, .card, div#gameTitle {
   overflow: hidden;
 }
 
+#tips {
+  display: none;
+  top: 25px;
+  width: 300px;
+  position: absolute;
+  left: 50%;
+  margin-left: -150px;
+  z-index: 100;
+  background: repeating-linear-gradient( 45deg, #2A6C15 0px, #2A6C15 10px, #3A7C25 10px, #3A7C25 20px );
+  border: 2px solid #ddd;
+}
+
+#tips h3 {
+  margin: 0;
+  background: linear-gradient(to bottom, #77d42a 5%, #5cb811 100%);
+  color:white;
+  font-weight: bold;
+  text-align: center;
+}
+
+#tips p {
+  margin: 0.5em;
+  color:white;
+}
 /* --------------------------------------------------------------------------------------------- */
 
 /* Responsive Rules: 1281-1400=PC */

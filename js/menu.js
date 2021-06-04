@@ -43,13 +43,13 @@ var Menu = (function(){
   function handleOpen(status) {
     if(status == "win"){
       runningGame = false;
-      Menu.setTitle("GAME # WON !!!");
+      setTitle("GAME # WON !!!");
       $("#menuPlayBtn").show();
       $("#menuNewBtn").hide();
       $("#menuRetryBtn").hide();
       $("#menuResumeBtn").hide();
     }else if(status == "start"){
-      Menu.setTitle("Freecell");
+      setTitle("Freecell");
       $("#menuPlayBtn").show();
       $("#menuNewBtn").hide();
       $("#menuRetryBtn").hide();
@@ -87,15 +87,13 @@ var Menu = (function(){
     if(!gameSeed){
       if(Options.selectSeed())
         return openDialogSeed();
-      gameNumber = parseInt($("#seed").val());
-    }else{
-      gameNumber = gameSeed;
+      gameSeed = getRandomGame();
     }
     if(runningGame)
       Sound.play("sadTrombone");
-    setRunningGame(gameNumber);
+    setRunningGame(gameSeed);
     $('#dialogMenu').dialog('close');
-    doFillBoard();
+    doFillBoard(gameSeed);
   }
 
   function handleRetry() {
@@ -103,5 +101,5 @@ var Menu = (function(){
     $('#dialogMenu').dialog('close');
     doFillBoard(gameNumber);
   }
-  return {setRunningGame, setTitle, handleOpen, handleNewGame, handleNewSeedGame, handleRetry, init};
+  return {handleOpen, handleNewGame, handleNewSeedGame, handleRetry, init};
 })();
