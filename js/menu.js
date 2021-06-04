@@ -1,5 +1,5 @@
 /* jshint esversion:8, loopfunc:true, undef: true, unused: true, sub:true, browser:true */
-/* global $, Sound, doFillBoard */
+/* global $, Sound, doFillBoard, Options */
 /* exported Menu */
 
 var Menu = (function(){
@@ -63,12 +63,37 @@ var Menu = (function(){
     $('#dialogMenu').dialog('open');
     $('#dialogMenu button').blur();
   }
+  
+  function getRandomGame(){
+    return 1 + Math.floor(Math.random()*1000000);
+  }
+  
+  function openDialogSeed(){
+    $("#seed").val("" + getRandomGame()).focus().select();
+    return $('#dialogSeed').dialog('open');
+  }
 
-  function handleNewGame() {
-    if(false)
-      return $('#dialogSeed').dialog('open');
+  function handleNewSeedGame() {
+    gameNumber = parseInt($("#seed").val());
+    if(isNaN(gameNumber)){
+      $("#seed").val("" + getRandomGame()).focus().select();
+      return;
+    }
+    $('#dialogSeed').dialog('close');
+    handleNewGame(gameNumber);
+  }
+  
+  function handleNewGame(gameSeed) {
+    if(!gameSeed){
+      if(Options.selectSeed())
+        return openDialogSeed();
+      gameNumber = parseInt($("#seed").val());
+    }else{
+      gameNumber = gameSeed;
+    }
     if(runningGame)
       Sound.play("sadTrombone");
+    setRunningGame(gameNumber);
     $('#dialogMenu').dialog('close');
     doFillBoard();
   }
@@ -78,5 +103,5 @@ var Menu = (function(){
     $('#dialogMenu').dialog('close');
     doFillBoard(gameNumber);
   }
-  return {setRunningGame, setTitle, handleOpen, handleNewGame, handleRetry, init};
+  return {setRunningGame, setTitle, handleOpen, handleNewGame, handleNewSeedGame, handleRetry, init};
 })();

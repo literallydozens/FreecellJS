@@ -3,21 +3,22 @@
 /* exported Options */
 
 var Options = (function(){
-  // SETUP: Table backgrounds
+  // STable backgrounds
   let gameTableBkgds = {};
   gameTableBkgds.pattern = { url:'img/table_pattern.jpg' };
   gameTableBkgds.circles = { url:'img/table_circles.jpg' };
   gameTableBkgds.felt    = { url:'img/table_felt.jpg'    };
   gameTableBkgds.plain   = { url:'img/table_plain.png'   };
 
-  // SETUP: Game Options / Defaults
+  // Game Options / Defaults
   let gameOpts = {};
   gameOpts.selectSeed     = false;
-  gameOpts.showTips       = false;
+  gameOpts.showTips       = true;
   gameOpts.sound          = true;
   gameOpts.tableBkgdUrl   = gameTableBkgds.pattern.url;
   
   function init(){
+    // prepare modal
     let position = { my: "center", at: "center", of: window };    
     $('#dialogOptions').dialog({
       modal: true,
@@ -30,6 +31,7 @@ var Options = (function(){
       position
     });
     $(window).on("window:resize", () => $('#dialogOptions').dialog({position}));
+    // read locally stored options
     if(localStorage.tableBkgdUrl)
       gameOpts.tableBkgdUrl = localStorage.tableBkgdUrl;
     $('body').css('background', 'url("'+ gameOpts.tableBkgdUrl +'")');
@@ -39,7 +41,10 @@ var Options = (function(){
       gameOpts.showTips = (localStorage.showTips == "true");
     if(localStorage.selectSeed)
       gameOpts.selectSeed = (localStorage.selectSeed == "true");
+    // construct the UI
     $('#chkOptSound').prop('checked', gameOpts.sound);
+    $('#chkTooltip').prop('checked', gameOpts.showTips);
+    $('#chkSelectSeed').prop('checked', gameOpts.selectSeed);
     $.each(gameTableBkgds, function(i,obj){
       let radioBtn = $("<input>").attr("name", "radBkgd").attr("type", "radio");
       radioBtn.attr("id", "radBkgd-"+i);
@@ -59,20 +64,28 @@ var Options = (function(){
 
   function handleOpen() {
     $('#chkOptSound').prop('checked', gameOpts.sound);
+    $('#chkTooltip').prop('checked', gameOpts.showTips);
+    $('#chkSelectSeed').prop('checked', gameOpts.selectSeed);
     $('#dialogOptions').dialog('open');
   }
 
   function handleClose() {
-    // STEP 1: Update game options
+    // Update game options
     gameOpts.sound = $('#chkOptSound').prop('checked');
-    localStorage.sound = (gameOpts.sound?"true":"false");
+    gameOpts.showTips = $('#chkTooltip').prop('checked');
+    gameOpts.selectSeed = $('#chkSelectSeed').prop('checked');
     
-    // STEP 2: Set background
+    // Save options locally
+    localStorage.sound = (gameOpts.sound?"true":"false");
+    localStorage.showTips = (gameOpts.showTips?"true":"false");
+    localStorage.selectSeed = (gameOpts.selectSeed?"true":"false");
+    
+    // Set background
     let strBkgdUrl = $('input[type="radio"][name="radBkgd"]:checked').data('url');
     if(strBkgdUrl) $('body').css('background', 'url("'+ strBkgdUrl +'")');
     localStorage.tableBkgdUrl = strBkgdUrl;
 
-    // LAST: Close dialog
+    // Close dialog
     $('#dialogOptions').dialog('close');
   }
   

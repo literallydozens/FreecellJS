@@ -423,9 +423,6 @@ function doFillBoard(gameNumber) {
   $('#cardOpen .slot').droppable('enable');
   
   // STEP 3: Choose dealing method
-  if(!gameNumber)
-    gameNumber = 1+Math.floor(32000*Math.random());
-  Menu.setRunningGame(gameNumber);
   let method = Deals.standard.bind(null,gameNumber);
   //method = Deals.debug2;
 

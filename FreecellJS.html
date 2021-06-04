@@ -65,14 +65,17 @@
   </div>
 
   <div id="dialogSeed" style="display:none">
-    <label for="chkOptSound">Seed <input id="seed" type="text" size="6"></label>
+    <label for="seed">Seed <input id="seed" type="text" size="6"></label>
+    <hr/>
     <button class="coolBtn small green highlight" onclick="Menu.handleNewSeedGame()">PLAY !</button>
   </div>
   
   <div id="dialogOptions" style="display:none">
-    <div class="label">Sound</div>
+    <div class="label">Options</div>
     <fieldset>
-      <label for="chkOptSound"><input id="chkOptSound" type="checkbox" checked="checked"> Play Sounds</label>
+      <label for="chkOptSound"><input id="chkOptSound" type="checkbox" checked="checked"> Play Sounds</label><br/>
+      <label for="chkTooltip"><input id="chkTooltip" type="checkbox" checked="checked"> Show Tooltip</label><br/>
+      <label for="chkSelectSeed"><input id="chkSelectSeed" type="checkbox"> Select Seed</label>
     </fieldset>
 
     <div class="label">Table Background</div>
