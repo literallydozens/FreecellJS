@@ -70,8 +70,8 @@
     .card .corner span               { font-size: 4.5em; }
     .card .corner.top                { top:    1em; left:  1em; text-align: left;  }
     .card .corner.bottom             { bottom: 1em; right: 1em; text-align: right; }
-    .card .corner.top    span        { font-family: Suit;   font-size: 3em; margin-bottom: 2.25em; transform:rotate(180deg); }
-    .card .corner.bottom span        { font-family: Suit;   font-size: 3em; margin-bottom: 2.25em; transform:rotate(180deg); text-align:center; }
+    .card .corner.top    span        { font-family: Suit;   font-size: 3em; margin-bottom: 3.75em; transform:rotate(180deg); }
+    .card .corner.bottom span        { font-family: Suit;   font-size: 3em; margin-bottom: 3.75em; transform:rotate(180deg); text-align:center; }
     .card .corner.top    span.number { font-family: Roboto; font-size: 2em; transform:rotate(0deg); }
     .card .corner.bottom span.number { font-family: Roboto; font-size: 2em; text-align:left; padding-top:0em; transform:rotate(0deg); }
 
