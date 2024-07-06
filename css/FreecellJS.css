@@ -184,8 +184,10 @@ button.coolBtn.small {
 }
 #dialogOptions #optBkgds > div > div:first-child { vertical-align: middle; }
 
+/*
 #dialogYouWon {
 }
+*/
 
 #dialogYouWon .bigText {
     color: #BA01FF;
@@ -358,7 +360,7 @@ button.highlight {
 
 #topBar button {
   position: static;
-  margin: 0px 10px 0px 0px
+  margin: 0px 10px 0px 0px;
   width: auto;
   display:inline-block;
   cursor:pointer;
@@ -367,6 +369,11 @@ button.highlight {
   border:1px solid #268a16; border-radius:6px;
   box-shadow: inset 0px 1px 0px 0px #caefab;
   font-size: 0.5em; color: #306108; text-decoration: none; text-shadow:0px 2px 0px #aade7c;
+}
+
+#fullscreen {
+  margin-left: auto !important; 
+  margin-right: 0 !important;
 }
 
 #topBar > div > div {
